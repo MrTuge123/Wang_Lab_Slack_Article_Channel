@@ -6,6 +6,7 @@ Test only:    python main.py --dry-run   (prints ranking + message, doesn't post
 """
 import json
 import os
+import re
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -53,6 +54,17 @@ def search_pubmed():
     return r.json()["esearchresult"]["idlist"]
 
 
+def co_first_authors(authors):
+    """[(position, last name)] of the authors PubMed marks as equal first authors.
+    Only the run at the top of the list counts; flags further down usually mark co-senior authors."""
+    run = []
+    for i, a in enumerate(authors):
+        if a.get("EqualContrib") != "Y":
+            break
+        run.append((i, a.findtext("LastName", "")))
+    return run
+
+
 def fetch_details(pmids):
     r = requests.get(f"{EUTILS}/efetch.fcgi", params={
         "db": "pubmed", "id": ",".join(pmids), "retmode": "xml",
@@ -65,6 +77,7 @@ def fetch_details(pmids):
     for art in root.findall(".//PubmedArticle"):
         title_el = art.find(".//ArticleTitle")
         doi_el = art.find(".//PubmedData/ArticleIdList/ArticleId[@IdType='doi']")
+        authors = art.findall(".//AuthorList/Author")
         papers.append({
             "pmid": art.findtext(".//PMID"),
             "doi": doi_el.text.strip().lower() if doi_el is not None and doi_el.text else None,
@@ -73,7 +86,9 @@ def fetch_details(pmids):
             "abstract": " ".join("".join(a.itertext())
                                  for a in art.findall(".//AbstractText")),
             "pubmed_authors": [f"{a.findtext('ForeName', '')} {a.findtext('LastName', '')}".strip()
-                               for a in art.findall(".//AuthorList/Author")],
+                               for a in authors],
+            "co_first": co_first_authors(authors),
+            "keywords": ["".join(k.itertext()).strip() for k in art.findall(".//KeywordList/Keyword")],
         })
     return papers
 
@@ -81,6 +96,18 @@ def fetch_details(pmids):
 # ---------- 2. Rank with author / journal impact ----------
 def _norm(s):
     return s.strip().lower()
+
+
+def _words(s):
+    """'Multi-Omics Integration' -> ' multi omics integration ' (padded for whole-word matching)"""
+    return " " + " ".join(re.findall(r"\w+", s.lower())) + " "
+
+
+def keyword_hits(p):
+    """Your key_words found in the paper's author keywords, each counted once.
+    Whole words only: 'diabetes' matches 'Type 2 Diabetes' but not 'diabetic'."""
+    kws = [_words(k) for k in p["keywords"]]
+    return [t for t in RANK.get("key_words") or [] if any(_words(t) in k for k in kws)]
 
 
 def is_preferred_author(p):
@@ -117,7 +144,8 @@ def score(p):
         a = 1.0
     if is_preferred_journal(p):
         j = 1.0
-    return round((wa * a + wj * j) / (wa + wj), 3)
+    credit = RANK.get("keyword_credit", 0.1) * len(p["keyword_hits"])
+    return round((wa * a + wj * j) / (wa + wj) + credit, 3)
 
 
 def passes_filters(p):
@@ -132,12 +160,13 @@ def passes_filters(p):
 
 
 def print_ranking(papers):
-    print(f"\n{'score':>5}  {'h':>4}  {'jrnl':>5}  pass  title")
+    print(f"\n{'score':>5}  {'h':>4}  {'role':<22}  {'jrnl':>5}  {'kw':>2}  pass  title")
     for p in papers:
         flag = "yes" if p["passed"] else "no"
         tag = "" if p.get("oa_matched") else " [not in OpenAlex]"
-        print(f"{p['score']:>5.2f}  {author_h(p):>4}  {journal_citedness(p):>5}  "
-              f"{flag:<4}  {p['title'][:60]}{tag}")
+        role = (p.get("top_author") or {}).get("role", "")
+        print(f"{p['score']:>5.2f}  {author_h(p):>4}  {role:<22}  {journal_citedness(p):>5}  "
+              f"{len(p['keyword_hits']):>2}  {flag:<4}  {p['title'][:60]}{tag}")
     print()
 
 
@@ -180,7 +209,10 @@ def esc(text):
 def impact_line(p):
     bits = [esc(p["journal"])]
     if p.get("top_author"):
-        bits.append(f"top author: {esc(p['top_author']['name'])} (h={p['top_author']['h']})")
+        a = p["top_author"]
+        bits.append(f"top author: {esc(a['name'])} ({a['role']}, h={a['h']})")
+    if p["keyword_hits"]:
+        bits.append("keywords: " + ", ".join(esc(k) for k in p["keyword_hits"]))
     bits.append(f"score {p['score']:.2f}")
     return "_" + " · ".join(bits) + "_"
 
@@ -220,6 +252,7 @@ def main():
         print(f"Warning: OpenAlex lookup failed ({e}); ranking without it.")
 
     for p in papers:
+        p["keyword_hits"] = keyword_hits(p)
         p["score"] = score(p)
         p["passed"] = passes_filters(p)
     papers.sort(key=lambda p: p["score"], reverse=True)

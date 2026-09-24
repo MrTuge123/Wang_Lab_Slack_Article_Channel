@@ -4,7 +4,9 @@ Also a tool to find an author's OpenAlex ID (names are ambiguous, IDs aren't):
     python openalex.py "Meng Wang"
 """
 import os
+import re
 import sys
+import unicodedata
 
 import requests
 from dotenv import load_dotenv
@@ -34,6 +36,33 @@ def _short(url):
 
 def _clean_doi(doi):
     return doi.lower().replace("https://doi.org/", "") if doi else None
+
+
+def _author_id(authorship):
+    """OpenAlex author ID ('A123'), or None if OpenAlex couldn't identify the author."""
+    return _short((authorship.get("author") or {}).get("id"))
+
+
+def _name_tokens(name):
+    """'Jürgen El-Sayed' -> {'jurgen', 'el', 'sayed'} (lowercase, accents stripped)"""
+    name = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    return set(re.findall(r"[a-z]+", name.lower()))
+
+
+def _find_authorship(auths, pos, last_name):
+    """OpenAlex authorship of the PubMed author at position `pos`, checked by last name.
+    Author order usually matches PubMed; if not, use the only author with that last name."""
+    want = _name_tokens(last_name)
+
+    def same(a):
+        names = (_name_tokens(a.get("raw_author_name"))
+                 | _name_tokens((a.get("author") or {}).get("display_name")))
+        return bool(want) and want <= names
+
+    if pos < len(auths) and same(auths[pos]):
+        return auths[pos]
+    hits = [a for a in auths if same(a)]
+    return hits[0] if len(hits) == 1 else None
 
 
 # ---------- Find each paper in OpenAlex ----------
@@ -90,15 +119,28 @@ def enrich(papers):
         p["oa_matched"] = w is not None
         if not w:
             continue
-        auths = [a for a in w.get("authorships", []) if (a.get("author") or {}).get("id")]
-        p["author_ids"] = [_short(a["author"]["id"]) for a in auths]
+        all_auths = w.get("authorships", [])       # unfiltered, so positions line up with PubMed
+        auths = [a for a in all_auths if _author_id(a)]
+        p["author_ids"] = [_author_id(a) for a in auths]
         p["author_names"] = [a["author"].get("display_name", "") for a in auths]
 
-        # Only first + last author get h-index lookups (lead + usually the PI)
-        key = [_short(a["author"]["id"]) for a in auths
-               if a.get("author_position") in ("first", "last")]
-        infos = [author_info(aid) for aid in key]
-        p["top_author"] = max(infos, key=lambda x: x["h"], default=None)
+        # h-index lookups only for the key authors (the highest one counts):
+        #   lead:           co-first authors flagged in PubMed, else the first author
+        #   corresponding:  corresponding authors flagged in OpenAlex, else the last author (usually the PI)
+        firsts = [a for a in (_find_authorship(all_auths, pos, last) for pos, last in p.get("co_first", []))
+                  if a and _author_id(a)]
+        firsts = firsts or [a for a in auths if a.get("author_position") == "first"]
+        corrs = ([a for a in auths if a.get("is_corresponding")]
+                 or [a for a in auths if a.get("author_position") == "last"])
+
+        roles = {}                                 # author ID -> e.g. ["first", "corresponding"]
+        for a in firsts:
+            roles.setdefault(_author_id(a), []).append("co-first" if len(firsts) > 1 else "first")
+        for a in corrs:
+            roles.setdefault(_author_id(a), []).append("corresponding" if a.get("is_corresponding") else "last")
+        # Copy the cached author dicts so the per-paper role isn't shared between papers
+        p["key_authors"] = [{**author_info(aid), "role": "+".join(r)} for aid, r in roles.items()]
+        p["top_author"] = max(p["key_authors"], key=lambda x: x["h"], default=None)
 
         src = (w.get("primary_location") or {}).get("source") or {}
         p["source"] = source_info(_short(src["id"])) if src.get("id") else None

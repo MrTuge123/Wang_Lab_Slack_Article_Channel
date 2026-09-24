@@ -1,7 +1,7 @@
 # ---- Edit these to change what the bot looks for ----
 
 # PubMed search terms (same syntax as the PubMed search box)
-query: "hypertension AND wearable device"
+query: "graph neural network AND knowledge graph"
 
 # Optional: hard filters, only these journals (leave the list empty [] for all journals)
 journals: []
@@ -16,12 +16,13 @@ model: "kimi-k2.6"
 
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
 ranking:
-  # Final score (0-1) = weighted mix of author score and journal score
+  # Final score = weighted mix of author score and journal score (0-1),
+  # plus keyword_credit for each matched keyword (see key_words below)
   author_weight: 0.6
   journal_weight: 0.4
 
   # Caps: at or above these values a paper gets the full score for that part
-  author_h_cap: 60             # h-index of the paper's top first/last author
+  author_h_cap: 60             # h-index of the paper's top co-first/corresponding author
   journal_citedness_cap: 10    # journal's 2-year mean citations (~ impact factor)
 
   # Hard filters (0 = off). Preferred authors/journals always pass.
@@ -37,3 +38,9 @@ ranking:
   # or exact name. Find IDs with:  python openalex.py "Author Name"
   preferred_authors: []
   preferred_journals: []
+
+  # Keyword credit: + keyword_credit for each of your key_words found in the paper's
+  # author keywords. Case and -/space are ignored, and whole words must match:
+  # "diabetes" matches "Type 2 Diabetes" but not "diabetic"; "multi-omics" doesn't match "multiomics".
+  key_words: ["multi-omics", "machine learning","knowledge graph", "graph neural network", "GNN", "deep learning", "AI", "artificial intelligence"]
+  keyword_credit: 0.1
