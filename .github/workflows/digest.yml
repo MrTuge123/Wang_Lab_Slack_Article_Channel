@@ -1,0 +1,44 @@
+name: Paper digest
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"   # Mondays 13:00 UTC (9am Ann Arbor in summer, 8am in winter)
+  workflow_dispatch:        # adds a "Run workflow" button on GitHub
+
+permissions:
+  contents: write           # lets the job commit seen.json back
+
+concurrency:
+  group: paper-digest       # never run two digests at once
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Run digest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+        run: python main.py
+
+      - name: Save seen.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f seen.json ] || exit 0
+          git add seen.json
+          git diff --cached --quiet || git commit -m "Update seen.json [skip ci]"
+          git push
