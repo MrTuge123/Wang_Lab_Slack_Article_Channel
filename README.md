@@ -1,37 +1,21 @@
 ## This is the working repo of a Slack-based information retrieval pipeline
 
-### Stage 1: Fetch new papers
-- PubMed E-utilities for journal retrieval
-- Crossref API
+## Current Pipeline
 
-### Stage 2: store, de-duplicate
-- write seen.json (or SQLite) -> DOI (Fallback: PMID)
+1. **Load settings:** `config.yaml` (query, n/k/s, ranking weights and filters) and `.env` (Slack, Kimi, NCBI, and OpenAlex keys).
+2. **Search PubMed:** up to k = 50 papers matching the query, added in the last n = 7 days, sorted by PubMed Best Match. The `journals:` whitelist is applied here if set.
+3. **Drop seen papers:** skip any PMID or DOI already in `seen.json`.
+4. **Fetch details:** title, journal, abstract, DOI, and authors for each paper from PubMed.
+5. **Enrich via OpenAlex:** find each paper by DOI (falling back to PMID), then look up the higher h-index of the first and last authors and the journal's 2-year mean citedness. Papers not in OpenAlex yet get a neutral score.
+6. **Score:** `0.6 × author score + 0.4 × journal score`, each capped at 1. Preferred authors or journals get full marks on that part.
+7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness`, and `keep_unmatched`. All are currently off, and preferred authors and journals always pass. The ranking table is printed here.
+8. **Keep the top s = 5.**
+9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits.
+10. **Post to Slack:** one digest message with title, link, journal, top author and h-index, score, and summary. With `--dry-run`, it prints instead.
+11. **Save:** add the posted papers' PMIDs and DOIs to `seen.json`.
 
-### Stage 3: summarize with LLM API
-- Summarize with LLM API
 
-### Post to Slack
-- Create Slack app with an incoming Webhook
-
-### Skills
-- Keywords?
-- Authors (weights)
-- Daily
-- Manual/Automatic?
-- Use domain knowledge
-- Target Scope, Target Journal
-- email/slack auto plugin ()
-
-Main questions now:
-1. we need customizable features:
-    1.1 journals (we want to be able to target specific )
-    1.2 specific authors in topics might be weighed more, how do we determine what authors are 'authorities' in the field
-2. pipeline should be:
-    2.1. obtain the top k articles, sort by relevance using PubMed's built in algorithm published in the past n days, or we can also use keywords
-    2.2 feed the abstract/title/keywords into LLM model, LLM scores each article's relevance (title, abstract, keywords) against a lab-interest profile; author weights come from a config list and/or OpenAlex/Semantic Scholar metrics
-    2.3 for the determined articles, read the full journal article (availability TBA), summarize (metrics TBD) and return the top s results to slack
-3. How to evaluate?
-4. Potential learning from slack?
-5. How to determine 'authorities'
-     a manual list, metrics, or both, and how much weight they get
-6. Parameters from part 2, n, k, s, adjustable?
+## TODO:
+1. ranking algorithm (similarity PubMed), authors ranking, journals (impact factor DB, csv)
+2. scihub
+3. Interactive API?
