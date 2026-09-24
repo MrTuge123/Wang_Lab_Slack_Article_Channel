@@ -1,0 +1,11 @@
+query: "microplastics AND Raman spectroscopy"
+ 
+# Optional: only these journals (leave the list empty [] for all journals)
+journals: []
+#  - "Nature"
+#  - "Environmental Science & Technology"
+ 
+days_back: 7      # look at papers added in the last N days
+max_papers: 5     # max papers per post
+model: "kimi-k2.6"
+ 
