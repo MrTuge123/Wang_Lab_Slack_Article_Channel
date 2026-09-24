@@ -26,8 +26,10 @@ SEEN_FILE = "seen.json"
 EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 NCBI_KEY = os.getenv("NCBI_API_KEY")   # optional; raises limit to 10 req/sec
 
-kimi = OpenAI(base_url="https://api.moonshot.ai/v1",
-              api_key=os.environ["MOONSHOT_API_KEY"])
+kimi = OpenAI(
+    api_key=os.getenv("MOONSHOT_API_KEY"),
+    base_url="https://api.moonshot.ai/v1"
+)
 
 
 # ---------- 1. Search PubMed ----------
