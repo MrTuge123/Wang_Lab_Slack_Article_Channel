@@ -2,7 +2,7 @@ name: Paper digest
 
 on:
   schedule:
-    - cron: "0 16 * * 5"   # Mondays 13:00 UTC (9am Ann Arbor in summer, 8am in winter)
+    - cron: "0 16 * * 5"   # Fridays 16:00 UTC (12pm Ann Arbor in summer, 11am in winter)
   workflow_dispatch:        # adds a "Run workflow" button on GitHub
 
 permissions:
@@ -29,12 +29,14 @@ jobs:
       - name: Run digest
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          WeCom_URL: ${{ secrets.WECOM_URL }}
           MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
         run: python main.py
 
       - name: Save seen.json
+        if: ${{ !cancelled() }}   # also when one chat failed, so the other doesn't get repeats
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

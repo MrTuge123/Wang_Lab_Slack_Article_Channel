@@ -1,8 +1,8 @@
 """Fetch new PubMed papers, rank them by author/journal impact (OpenAlex),
-summarize the top ones with Kimi, and post to Slack.
+summarize the top ones with Kimi, and post to Slack and WeCom.
 
 Run:          python main.py
-Test only:    python main.py --dry-run   (prints ranking + message, doesn't post)
+Test only:    python main.py --dry-run   (prints ranking + messages, doesn't post)
 """
 import json
 import os
@@ -175,7 +175,7 @@ def print_ranking(papers):
 # ---------- 3. Summarize with Kimi ----------
 def summarize(paper):
     if not paper["abstract"]:
-        return "_No abstract available._"
+        return "No abstract available."
     for attempt in range(5):                # new Kimi accounts allow only 3 requests/min
         try:
             return _summarize_once(paper)
@@ -183,7 +183,7 @@ def summarize(paper):
             wait = 20 * (attempt + 1)
             print(f"  Kimi rate limit hit, waiting {wait}s...")
             time.sleep(wait)
-    return "_Summary unavailable (rate limited)._"
+    return "Summary unavailable (rate limited)."
 
 
 def _summarize_once(paper):
@@ -202,29 +202,97 @@ def _summarize_once(paper):
     return r.choices[0].message.content.strip()
 
 
-# ---------- 4. Post to Slack ----------
+# ---------- 4. Post to Slack and WeCom ----------
+WECOM_MAX_BYTES = 4096                  # WeCom rejects longer markdown messages
+
+
 def esc(text):
     """Escape characters Slack treats specially."""
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def impact_line(p):
-    bits = [esc(p["journal"])]
+    bits = [p["journal"]]
     if p.get("top_author"):
         a = p["top_author"]
-        bits.append(f"top author: {esc(a['name'])} ({a['role']}, h={a['h']})")
+        bits.append(f"top author: {a['name']} ({a['role']}, h={a['h']})")
     if p["keyword_hits"]:
-        bits.append("keywords: " + ", ".join(esc(k) for k in p["keyword_hits"]))
+        bits.append("keywords: " + ", ".join(p["keyword_hits"]))
     bits.append(f"score {p['score']:.2f}")
-    return "_" + " · ".join(bits) + "_"
+    return " · ".join(bits)
 
 
-def post_to_slack(text):
-    if DRY_RUN:
-        print("----- DRY RUN: would post -----\n" + text)
-        return
+def pubmed_url(p):
+    return f"https://pubmed.ncbi.nlm.nih.gov/{p['pmid']}/"
+
+
+def slack_messages(top):
+    lines = [f":newspaper: *New papers* for `{esc(CFG['query'])}` "
+             f"(last {CFG['days_back']} days)\n"]
+    for p in top:
+        lines.append(f"*<{pubmed_url(p)}|{esc(p['title'])}>*\n"
+                     f"_{esc(impact_line(p))}_\n"
+                     f"{esc(p['summary'])}\n")
+    return ["\n".join(lines)]
+
+
+def wecom_messages(top):
+    """The same digest in WeCom markdown, packed into as few messages as its size limit allows."""
+    blocks = [f"📰 **New papers** for `{CFG['query']}` (last {CFG['days_back']} days)"]
+    for p in top:
+        title = p["title"].replace("[", "").replace("]", "")   # brackets would break the [title](url) link
+        blocks.append(f"[{title}]({pubmed_url(p)})\n"
+                      f'<font color="comment">{impact_line(p)}</font>\n'
+                      f"{p['summary']}")
+    messages = []
+    for b in blocks:
+        if messages and len((messages[-1] + "\n\n" + b).encode()) <= WECOM_MAX_BYTES:
+            messages[-1] += "\n\n" + b
+        else:                                                   # (cuts a single block that's too long)
+            messages.append(b.encode()[:WECOM_MAX_BYTES].decode(errors="ignore"))
+    return messages
+
+
+def send_slack(text):
     r = requests.post(os.environ["SLACK_WEBHOOK_URL"], json={"text": text}, timeout=30)
     r.raise_for_status()
+
+
+def send_wecom(text):
+    r = requests.post(os.environ["WeCom_URL"],
+                      json={"msgtype": "markdown", "markdown": {"content": text}}, timeout=30)
+    r.raise_for_status()
+    if r.json().get("errcode") != 0:            # WeCom reports errors in the reply, with HTTP 200
+        raise RuntimeError(f"WeCom error: {r.json()}")
+
+
+# Chat -> (env variable holding its webhook URL, build the messages, send one message)
+CHATS = {
+    "Slack": ("SLACK_WEBHOOK_URL", slack_messages, send_slack),
+    "WeCom": ("WeCom_URL", wecom_messages, send_wecom),
+}
+
+
+def post(top):
+    """Post the digest to every chat whose webhook URL is set. Returns (posted, failed) chat names."""
+    chats = [name for name, (env, _, _) in CHATS.items() if DRY_RUN or os.getenv(env)]
+    if not chats:
+        sys.exit("Nowhere to post: set SLACK_WEBHOOK_URL and/or WeCom_URL in .env")
+    posted, failed = [], []
+    for name in chats:
+        _, build, send = CHATS[name]
+        messages = build(top)
+        try:
+            for i, text in enumerate(messages, 1):
+                if DRY_RUN:
+                    print(f"----- DRY RUN: would post to {name} ({i}/{len(messages)}) -----\n{text}\n")
+                else:
+                    send(text)
+            posted.append(name)
+        except (requests.RequestException, RuntimeError) as e:   # keep going: the other chat still gets it
+            print(f"Warning: posting to {name} failed ({e})")
+            failed.append(name)
+    return posted, failed
 
 
 # ---------- Remember what's already been posted (DOIs and PMIDs) ----------
@@ -265,19 +333,17 @@ def main():
         print("No papers passed the filters.")
         return
 
-    lines = [f":newspaper: *New papers* for `{esc(CFG['query'])}` "
-             f"(last {CFG['days_back']} days)\n"]
-    for p in top:
+    for p in top:                           # once, shared by every chat
         print("Summarizing:", p["title"][:80])
-        url = f"https://pubmed.ncbi.nlm.nih.gov/{p['pmid']}/"
-        lines.append(f"*<{url}|{esc(p['title'])}>*\n"
-                     f"{impact_line(p)}\n"
-                     f"{esc(summarize(p))}\n")
+        p["summary"] = summarize(p)
 
-    post_to_slack("\n".join(lines))
-    if not DRY_RUN:
-        save_seen(seen | {p["pmid"] for p in top} | {p["doi"] for p in top if p["doi"]})
-    print(f"Done: posted {len(top)} of {len(papers)} candidates.")
+    posted, failed = post(top)
+    if posted:                              # at least one chat has them, so don't post them again
+        if not DRY_RUN:
+            save_seen(seen | {p["pmid"] for p in top} | {p["doi"] for p in top if p["doi"]})
+        print(f"Done: posted {len(top)} of {len(papers)} candidates to {' and '.join(posted)}.")
+    if failed:
+        sys.exit(f"Posting failed for: {', '.join(failed)}")
 
 
 if __name__ == "__main__":
