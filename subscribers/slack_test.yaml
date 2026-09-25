@@ -1,0 +1,13 @@
+   name: "Slack test"
+   query: "graph neural network AND knowledge graph"
+   sources:
+     europepmc:        {enabled: true}
+     openalex:         {enabled: true}
+     semantic_scholar: {enabled: true}
+     arxiv:            {enabled: true}
+   outputs:
+     slack:
+       enabled: true
+       webhook_env: SLACK_WEBHOOK_URL
+     wecom:
+       enabled: false
