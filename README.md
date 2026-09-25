@@ -11,7 +11,7 @@
 7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness`, and `keep_unmatched`. All are currently off, and preferred authors and journals always pass. The ranking table is printed here.
 8. **Keep the top s = 5.**
 9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits.
-10. **Post to Slack and WeCom:** one digest with title, link, journal, top author and h-index, matched keywords, score, and summary, sent to every chat whose webhook URL is set (`SLACK_WEBHOOK_URL`, `WeCom_URL`). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints both instead.
+10. **Post to Slack and WeCom:** one digest with title, link, journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on in `config.yaml` (`Slack_summary`, `WeCom_summary`); each needs its webhook URL (`SLACK_WEBHOOK_URL`, `WeCom_URL`). `Email_summary` is reserved for email, which isn't built yet. WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints both instead.
 11. **Save:** add the posted papers' PMIDs and DOIs to `seen.json` (if at least one chat got them).
 
 

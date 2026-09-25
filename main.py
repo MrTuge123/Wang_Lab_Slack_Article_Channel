@@ -266,21 +266,28 @@ def send_wecom(text):
         raise RuntimeError(f"WeCom error: {r.json()}")
 
 
-# Chat -> (env variable holding its webhook URL, build the messages, send one message)
+# Chat -> (on/off switch under ranking: in config.yaml, env variable holding its webhook URL,
+#          build the messages, send one message)
 CHATS = {
-    "Slack": ("SLACK_WEBHOOK_URL", slack_messages, send_slack),
-    "WeCom": ("WeCom_URL", wecom_messages, send_wecom),
+    "Slack": ("Slack_summary", "SLACK_WEBHOOK_URL", slack_messages, send_slack),
+    "WeCom": ("WeCom_summary", "WeCom_URL", wecom_messages, send_wecom),
 }
 
 
 def post(top):
-    """Post the digest to every chat whose webhook URL is set. Returns (posted, failed) chat names."""
-    chats = [name for name, (env, _, _) in CHATS.items() if DRY_RUN or os.getenv(env)]
+    """Post the digest to every chat switched on in config.yaml. Returns (posted, failed) chat names."""
+    if RANK.get("Email_summary"):
+        print("Note: Email_summary is on, but sending email isn't built yet, so no email was sent.")
+    chats = [name for name, (switch, *_) in CHATS.items() if RANK.get(switch)]
     if not chats:
-        sys.exit("Nowhere to post: set SLACK_WEBHOOK_URL and/or WeCom_URL in .env")
+        sys.exit("Nowhere to post: turn on Slack_summary and/or WeCom_summary in config.yaml")
     posted, failed = [], []
     for name in chats:
-        _, build, send = CHATS[name]
+        _, env, build, send = CHATS[name]
+        if not (DRY_RUN or os.getenv(env)):     # switched on, but nowhere to send it
+            print(f"Warning: {name} is switched on, but {env} isn't set (.env or GitHub secrets)")
+            failed.append(name)
+            continue
         messages = build(top)
         try:
             for i, text in enumerate(messages, 1):

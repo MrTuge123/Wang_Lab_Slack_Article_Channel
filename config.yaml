@@ -26,9 +26,9 @@ ranking:
   journal_citedness_cap: 10    # journal's 2-year mean citations (~ impact factor)
 
   # Hard filters (0 = off). Preferred authors/journals always pass.
-  min_score: 0.0
-  min_author_h_index: 0
-  min_journal_citedness: 0
+  min_score: 0.0 #min weigheted score to pass filter (0-1)
+  min_author_h_index: 0 #min h-index of the paper's top co-first/corresponding author
+  min_journal_citedness: 0 #min journal's 2-year mean citations (~ impact factor)
 
   # New papers are sometimes not in OpenAlex yet
   keep_unmatched: true
@@ -44,3 +44,8 @@ ranking:
   # "diabetes" matches "Type 2 Diabetes" but not "diabetic"; "multi-omics" doesn't match "multiomics".
   key_words: ["multi-omics", "machine learning","knowledge graph", "graph neural network", "GNN", "deep learning", "AI", "artificial intelligence"]
   keyword_credit: 0.1
+
+  #Summary sending options
+  Slack_summary: false # send a summary of the paper to Slack
+  WeCom_summary: true # send a summary of the paper to WeCom
+  Email_summary: true # send a summary of the paper to Email
