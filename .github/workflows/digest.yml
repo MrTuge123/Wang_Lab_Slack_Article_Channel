@@ -2,7 +2,7 @@ name: Paper digest
 
 on:
   schedule:
-    - cron: "0 16 * * 5"   # Fridays 16:00 UTC (12pm Ann Arbor in summer, 11am in winter)
+    - cron: "0 20 * * 5"   # Fridays 16:00 UTC (12pm Ann Arbor in summer, 11am in winter)
   workflow_dispatch:        # adds a "Run workflow" button on GitHub
     inputs:
       subscriber:
