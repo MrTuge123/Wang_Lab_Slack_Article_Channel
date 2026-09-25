@@ -8,7 +8,8 @@
     query.py       one boolean query (or a topic Kimi turns into one) -> each source's syntax
     llm.py         Kimi client with rate-limit retries
     summarizer.py  2-3 sentence summaries with Kimi
-    notify/        build and send the digest to Slack / WeCom
+    notify/        build and send the digest to Slack / WeCom / email
+    env.py         read secrets from .env or GitHub
     store.py       what each subscriber has already received (seen/), run lock
 """
 from dotenv import load_dotenv
