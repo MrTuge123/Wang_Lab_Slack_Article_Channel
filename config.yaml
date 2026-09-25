@@ -1,23 +1,17 @@
-# ---- Edit these to change what the bot looks for ----
+# ---- Shared defaults for every subscriber ----
+# Each subscriber has its own file in subscribers/ (query, filters, where to post).
+# Anything set there overrides the value here; ranking: is merged key by key.
 
-# PubMed search terms (same syntax as the PubMed search box)
-query: "graph neural network AND knowledge graph"
-
-# Optional: hard filters, only these journals (leave the list empty [] for all journals)
-journals: []
-#  - "Nature"
-#  - "Environmental Science & Technology"
-
-days_back: 30              # n: papers added to PubMed in the last n days
-pubmed_sort: relevance    # "relevance" (PubMed Best Match) or "pub_date"
-candidate_pool: 50        # k: papers pulled from PubMed before ranking
-max_papers: 5             # s: papers posted to Slack
 model: "kimi-k2.6"
+pubmed_sort: relevance    # "relevance" (PubMed Best Match) or "pub_date"
+days_back: 30             # n: papers added to PubMed in the last n days
+candidate_pool: 50        # k: papers pulled from PubMed before ranking
+max_papers: 5             # s: papers posted per subscriber
 
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
 ranking:
   # Final score = weighted mix of author score and journal score (0-1),
-  # plus keyword_credit for each matched keyword (see key_words below)
+  # plus keyword_credit for each matched keyword (key_words are set per subscriber)
   author_weight: 0.6
   journal_weight: 0.4
 
@@ -26,26 +20,12 @@ ranking:
   journal_citedness_cap: 10    # journal's 2-year mean citations (~ impact factor)
 
   # Hard filters (0 = off). Preferred authors/journals always pass.
-  min_score: 0.0 #min weigheted score to pass filter (0-1)
-  min_author_h_index: 0 #min h-index of the paper's top co-first/corresponding author
-  min_journal_citedness: 0 #min journal's 2-year mean citations (~ impact factor)
+  min_score: 0.0               # min weighted score to pass filter (0-1)
+  min_author_h_index: 0        # min h-index of the paper's top co-first/corresponding author
+  min_journal_citedness: 0     # min journal's 2-year mean citations (~ impact factor)
 
   # New papers are sometimes not in OpenAlex yet
   keep_unmatched: true
   unmatched_score: 0.3
 
-  # Always score full marks for these. Authors: OpenAlex ID (safer, e.g. "A5023888391")
-  # or exact name. Find IDs with:  python openalex.py "Author Name"
-  preferred_authors: []
-  preferred_journals: []
-
-  # Keyword credit: + keyword_credit for each of your key_words found in the paper's
-  # author keywords. Case and -/space are ignored, and whole words must match:
-  # "diabetes" matches "Type 2 Diabetes" but not "diabetic"; "multi-omics" doesn't match "multiomics".
-  key_words: ["multi-omics", "machine learning","knowledge graph", "graph neural network", "GNN", "deep learning", "AI", "artificial intelligence"]
-  keyword_credit: 0.1
-
-  #Summary sending options
-  Slack_summary: false # send a summary of the paper to Slack
-  WeCom_summary: true # send a summary of the paper to WeCom
-  Email_summary: true # send a summary of the paper to Email
+  keyword_credit: 0.1          # added per matched keyword

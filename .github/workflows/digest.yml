@@ -4,9 +4,14 @@ on:
   schedule:
     - cron: "0 16 * * 5"   # Fridays 16:00 UTC (12pm Ann Arbor in summer, 11am in winter)
   workflow_dispatch:        # adds a "Run workflow" button on GitHub
+    inputs:
+      subscriber:
+        description: "Only this subscriber (file name in subscribers/, without .yaml). Empty = all."
+        required: false
+        default: ""
 
 permissions:
-  contents: write           # lets the job commit seen.json back
+  contents: write           # lets the job commit seen/ back
 
 concurrency:
   group: paper-digest       # never run two digests at once
@@ -15,7 +20,7 @@ concurrency:
 jobs:
   digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45     # Kimi allows ~3 summaries/min, so each subscriber adds a few minutes
     steps:
       - uses: actions/checkout@v4
 
@@ -28,19 +33,35 @@ jobs:
 
       - name: Run digest
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          WeCom_URL: ${{ secrets.WECOM_URL }}
           MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
-        run: python main.py
+          # Webhook URLs: each subscriber's webhook_env is looked up among the repository
+          # secrets, so adding a subscriber only needs a new secret, not an edit here.
+          GITHUB_SECRETS_JSON: ${{ toJSON(secrets) }}
+          SUBSCRIBER: ${{ inputs.subscriber }}
+        run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 
-      - name: Save seen.json
+      - name: Save seen/
         if: ${{ !cancelled() }}   # also when one chat failed, so the other doesn't get repeats
         run: |
+          [ -d seen ] || exit 0
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          [ -f seen.json ] || exit 0
-          git add seen.json
-          git diff --cached --quiet || git commit -m "Update seen.json [skip ci]"
-          git push
+          rm -rf "$RUNNER_TEMP/ours" && cp -r seen "$RUNNER_TEMP/ours"
+          # If seen/ was pushed from elsewhere during the run (e.g. a laptop), merge both
+          # lists onto the latest commit instead of failing or overwriting; retry if it races again.
+          for attempt in 1 2 3; do
+            git fetch --quiet origin "$GITHUB_REF_NAME"
+            git reset --quiet --hard "origin/$GITHUB_REF_NAME"
+            for f in "$RUNNER_TEMP"/ours/*.json; do
+              [ -e "$f" ] && python -m digest.store merge "$f" "seen/$(basename "$f")"
+            done
+            git add seen
+            git diff --cached --quiet && exit 0
+            git commit --quiet -m "Update seen/ [skip ci]"
+            git push --quiet && exit 0
+            echo "Push rejected (attempt $attempt), merging again..."
+            sleep $((attempt * 5))
+          done
+          exit 1

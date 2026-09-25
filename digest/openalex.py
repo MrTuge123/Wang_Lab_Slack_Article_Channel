@@ -1,7 +1,7 @@
 """OpenAlex helpers: look up authors' h-index and journals' citation impact.
 
 Also a tool to find an author's OpenAlex ID (names are ambiguous, IDs aren't):
-    python openalex.py "Meng Wang"
+    python -m digest.openalex "Meng Wang"
 """
 import os
 import re
@@ -9,9 +9,7 @@ import sys
 import unicodedata
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
 BASE = "https://api.openalex.org"
 KEY = os.getenv("OPENALEX_API_KEY")
 WORK_FIELDS = "id,doi,authorships,primary_location"
@@ -150,7 +148,7 @@ def enrich(papers):
 if __name__ == "__main__":
     name = " ".join(sys.argv[1:])
     if not name:
-        sys.exit('Usage: python openalex.py "Author Name"')
+        sys.exit('Usage: python -m digest.openalex "Author Name"')
     data = _get("authors", search=name, per_page=10,
                 select="id,display_name,summary_stats,works_count,last_known_institutions")
     for a in data["results"]:

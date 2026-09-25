@@ -1,0 +1,34 @@
+# Wang Lab. Any setting from config.yaml can be overridden here.
+name: "Wang Lab"
+
+# PubMed search terms (same syntax as the PubMed search box)
+query: "graph neural network AND knowledge graph"
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals)
+journals: []
+#  - "Nature"
+#  - "Environmental Science & Technology"
+
+ranking:
+  # Always score full marks for these. Authors: OpenAlex ID (safer, e.g. "A5023888391")
+  # or exact name. Find IDs with:  python -m digest.openalex "Author Name"
+  preferred_authors: []
+  preferred_journals: []
+
+  # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
+  # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
+  # "diabetic"; "multi-omics" doesn't match "multiomics".
+  key_words: ["multi-omics", "machine learning", "knowledge graph", "graph neural network",
+              "GNN", "deep learning", "AI", "artificial intelligence"]
+
+# Where to post. webhook_env = the name of the secret holding the webhook URL
+# (in .env when running locally, a repository secret on GitHub).
+outputs:
+  slack:
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
+  wecom:
+    enabled: true
+    webhook_env: WeCom_URL
+  email:
+    enabled: true             # not built yet: only prints a note

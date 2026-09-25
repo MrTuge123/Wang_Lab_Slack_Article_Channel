@@ -1,0 +1,28 @@
+# Template for a new subscriber (files starting with _ are ignored).
+# 1. Copy to subscribers/<name>.yaml (letters, digits, - and _ only). <name> is the subscriber's ID:
+#    its "already sent" list is seen/<name>.json, and  python main.py --subscriber <name>  runs just it.
+# 2. Add each webhook URL as a secret under the name in webhook_env:
+#    locally in .env, and on GitHub under Settings > Secrets and variables > Actions.
+# Any setting from config.yaml (days_back, max_papers, model, ranking: ...) can be overridden here.
+name: "Example Lab"
+
+query: "single cell AND spatial transcriptomics"   # PubMed search box syntax
+journals: []
+# days_back: 7
+# max_papers: 3
+
+ranking:
+  preferred_authors: []       # OpenAlex IDs (python -m digest.openalex "Author Name") or exact names
+  preferred_journals: []
+  key_words: []
+  # min_author_h_index: 10
+
+outputs:
+  slack:
+    enabled: true
+    webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
+  wecom:
+    enabled: false
+    webhook_env: WECOM_URL_EXAMPLE_LAB
+  email:
+    enabled: false            # not built yet
