@@ -1,10 +1,10 @@
 # Wang Lab. Any setting from config.yaml can be overridden here.
-name: "Xinrui Dong"
+name: "Wang Lab"
 
 # What to search for: EITHER a boolean query, translated into every source's syntax...
 #   words or "quoted phrases", AND / OR / NOT (upper case), parentheses. PubMed gets it as written.
 #   Preview each source's version:  python -m digest.query '<your query>'
-query: '("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR glycolytic OR lactate)'
+query: "graph neural network AND knowledge graph"
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 
@@ -31,23 +31,18 @@ ranking:
   # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
   # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
   # "diabetic"; "multi-omics" doesn't match "multiomics".
-  key_words: ["Triple-negative breast cancer", "TNBC", "Glucose metabolism", "Metabolic heterogeneity",
-              "Lactate signaling", "Metabolite-protein interaction"]
+  key_words: ["multi-omics", "machine learning", "knowledge graph", "graph neural network",
+              "GNN", "deep learning", "AI", "artificial intelligence"]
 
-  # Hard filters (0 = off). Preferred authors/journals always pass.
-  min_score: 0          # min weighted score to pass filter (0-1)
-  min_author_h_index: 5        # min h-index of the paper's top co-first/corresponding author
-  min_journal_citedness: 10     # min journal's 2-year mean citations (~ impact factor)
 # Where to post. webhook_env = the name of the secret holding the webhook URL
-
 # (in .env when running locally, a repository secret on GitHub).
 outputs:
   slack:
     enabled: false
     webhook_env: SLACK_WEBHOOK_URL
   wecom:
-    enabled: true
+    enabled: false
     webhook_env: WeCom_URL
   email:
-    enabled: false            # sender account: SMTP_* secrets (see digest/notify/mail.py)
+    enabled: true            # sender account: SMTP_* secrets (see digest/notify/mail.py)
     to: ['qianhanyu722@gmail.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
