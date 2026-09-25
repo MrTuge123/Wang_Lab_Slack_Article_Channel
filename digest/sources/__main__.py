@@ -5,13 +5,14 @@ import sys
 
 from digest import paper
 from digest.config import load_subscribers
-from digest.sources import SOURCES, describe, enabled, search_all
+from digest.sources import SOURCES, describe, queries, search_all
 
 if len(sys.argv) != 2:
     sys.exit("Usage: python -m digest.sources <subscriber>")
 sub = load_subscribers(sys.argv[1])[0]
-for key, s in enabled(sub).items():
-    print(f"{SOURCES[key].NAME:<17} query: {s['query']}")
+qs, _ = queries(sub)                     # (search_all prints the query Kimi wrote, if any)
+for key, q in qs.items():
+    print(f"{SOURCES[key].NAME:<17} query: {q}")
 papers, report = search_all(sub)
 print("\nFound:", describe(report))
 total = sum(v for v in report.values() if isinstance(v, int))

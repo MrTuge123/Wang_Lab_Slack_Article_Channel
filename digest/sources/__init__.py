@@ -9,7 +9,7 @@ Check what each source returns for a subscriber (no ranking, no Kimi, no posting
 import datetime as dt
 from concurrent.futures import ThreadPoolExecutor
 
-from digest import paper
+from digest import paper, query
 from digest.sources import arxiv, europepmc, openalex, pubmed, semantic_scholar
 
 # Key under sources: in config -> module. Order = merge priority: when several sources have
@@ -24,30 +24,53 @@ SOURCES = {
 
 
 def enabled(sub):
-    """{source key: settings incl. query} for the sources switched on. PubMed falls back to the
-    top-level query:. A subscriber without a sources: section searches PubMed only."""
+    """{source key: its settings} for the sources switched on.
+    A subscriber without a sources: section searches PubMed only."""
     cfg = sub.get("sources") or {"pubmed": {"enabled": True}}
-    out = {}
-    for key, s in cfg.items():
-        s = dict(s or {})
-        if not s.get("enabled"):
-            continue
-        if key == "pubmed" and not s.get("query"):
-            s["query"] = sub.get("query")
-        out[key] = s
-    return out
+    return {k: dict(v or {}) for k, v in cfg.items() if (v or {}).get("enabled")}
 
 
 def check(sub):
-    """Problems with the subscriber's sources: settings (empty list if fine)."""
+    """Problems with the subscriber's query/topic and sources: settings (empty list if fine)."""
     srcs = enabled(sub)
     if not srcs:
         return ["no source is switched on under sources:"]
     problems = [f"sources.{k} is not a known source (known: {', '.join(SOURCES)})"
                 for k in srcs if k not in SOURCES]
-    problems += [f"sources.{k} is on but has no query" for k, s in srcs.items()
-                 if k in SOURCES and not s.get("query")]
+    if sub.get("query") and sub.get("topic"):
+        problems.append("set either query: (boolean) or topic: (plain English), not both")
+    elif sub.get("query"):
+        try:
+            query.parse(sub["query"])
+        except query.QueryError as e:
+            problems.append(f"query: {e}")
+    need = [k for k, v in srcs.items() if k in SOURCES and not v.get("query")]
+    if need and not (sub.get("query") or sub.get("topic")):
+        problems.append("add query: or topic: (needed by " + ", ".join(f"sources.{k}" for k in need) + ")")
     return problems
+
+
+def queries(sub):
+    """({source key: query in that source's syntax}, the boolean query Kimi wrote or None).
+    A source's own query: wins. Otherwise it's translated from the subscriber's query:
+    (PubMed gets that text as is), or from topic: via a boolean query Kimi writes."""
+    srcs = enabled(sub)
+    raw, tree, written = sub.get("query"), None, None
+    if any(not v.get("query") for v in srcs.values()):
+        if sub.get("topic"):
+            written, tree = query.from_topic(sub["topic"], sub["model"])
+            raw = None
+        else:
+            tree = query.parse(raw)
+    out = {}
+    for k, v in srcs.items():
+        if v.get("query"):
+            out[k] = v["query"]
+        elif k == "pubmed" and raw:
+            out[k] = raw
+        else:
+            out[k] = query.render(tree, k)
+    return out, written
 
 
 def _journal_ok(p, whitelist):
@@ -59,12 +82,14 @@ def search_all(sub):
     """Papers from every source switched on, duplicates merged, journals: whitelist applied.
     Returns (papers, report) where report is {source name: count or the exception it raised}."""
     srcs = enabled(sub)
+    qs, written = queries(sub)
+    if written:
+        print(f"Query Kimi wrote from the topic: {written}")
     since = dt.date.today() - dt.timedelta(days=sub["days_back"])
     default_limit = sub.get("candidate_pool", 50)
 
     def run(key):
-        s = srcs[key]
-        return SOURCES[key].search(sub, s["query"], since, s.get("candidate_pool", default_limit))
+        return SOURCES[key].search(sub, qs[key], since, srcs[key].get("candidate_pool", default_limit))
 
     results, report = {}, {}
     with ThreadPoolExecutor(max_workers=len(srcs)) as pool:

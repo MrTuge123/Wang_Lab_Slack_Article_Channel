@@ -9,9 +9,9 @@ candidate_pool: 50        # k: papers pulled from each source before ranking (pe
                           #    sources.<name>.candidate_pool)
 
 # ---- Where to search ----
-# Each subscriber switches sources on and gives each its own query (the syntax differs per source).
-# PubMed uses the subscriber's top-level query: unless sources.pubmed.query is set.
-# The same paper found in several sources is posted once.
+# Each subscriber switches sources on. Their query: (boolean) or topic: (plain English, Kimi
+# writes the query) is translated into each source's syntax at run time; a source's own
+# query: overrides that. The same paper found in several sources is posted once.
 sources:
   pubmed:           {enabled: true}
   europepmc:        {enabled: false}

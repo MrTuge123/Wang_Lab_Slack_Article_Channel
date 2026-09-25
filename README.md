@@ -7,6 +7,8 @@ main.py                 entry point: loops over subscribers, runs the steps belo
 digest/config.py        loads config.yaml + subscribers/*.yaml
 digest/paper.py         one paper record: IDs, link, merging duplicates
 digest/sources/         pubmed, europepmc, openalex, semantic_scholar, arxiv  (python -m digest.sources <subscriber>)
+digest/query.py         one query -> each source's syntax  (python -m digest.query '<query>' or --topic "...")
+digest/llm.py           Kimi client with rate-limit retries
 digest/openalex.py      author h-index, journal citedness  (python -m digest.openalex "Author Name")
 digest/ranking.py       score, filter, sort
 digest/summarizer.py    Kimi summaries
@@ -27,12 +29,27 @@ Each subscriber (a lab or channel) is one file in `subscribers/`, with its own q
 
 **Run:** `python main.py` (everyone), `--subscriber <name>` (just one), `--dry-run` (print, don't post or save). On GitHub, "Run workflow" takes an optional subscriber name.
 
+## Search queries
+
+Write the search once per subscriber, in one of two ways:
+
+- **`query:`** a boolean query: words or `"quoted phrases"`, `AND` / `OR` / `NOT` (upper case), parentheses; terms side by side are ANDed. It's translated into each source's syntax on every run (PubMed gets it as written; PubMed tags like `[tiab]` are dropped for other sources).
+- **`topic:`** a plain-English description. Kimi writes a boolean query from it on every run (printed in the log), which is then translated the same way.
+
+| Source | `"graph neural network" AND ("knowledge graph" OR KG) NOT review` becomes |
+|---|---|
+| PubMed, Europe PMC, OpenAlex | the same boolean query |
+| arXiv | `abs:"graph neural network" AND (abs:"knowledge graph" OR abs:KG) ANDNOT abs:review` |
+| Semantic Scholar | `graph neural network knowledge graph` (plain keywords: the first choice of each OR, no NOT terms) |
+
+To hand-tune one source, give it its own `query:` under `sources:` in that source's syntax; it overrides the translation. Preview: `python -m digest.query '<query>'` or `python -m digest.query --topic "<topic>"`.
+
 ## Current Pipeline
 
 For each subscriber in turn (one failing doesn't stop the others):
 
 1. **Load settings:** `config.yaml` defaults + `subscribers/<name>.yaml`, and `.env` (webhook URLs, Kimi, NCBI, OpenAlex and optional Semantic Scholar keys).
-2. **Search every source switched on, in parallel:** each with the subscriber's own query for that source, up to k = 50 papers each from the last n = 30 days. If a source fails, the others still run.
+2. **Search every source switched on, in parallel:** each with the query translated into its syntax (see Search queries), up to k = 50 papers each from the last n = 30 days. If a source fails, the others still run.
    - **PubMed:** papers added in the window, sorted by Best Match; the `journals:` whitelist is applied in the query.
    - **Europe PMC:** PubMed plus bioRxiv/medRxiv preprints and more (by first publication date).
    - **OpenAlex:** journals, conferences and preprints in every field (by publication date).

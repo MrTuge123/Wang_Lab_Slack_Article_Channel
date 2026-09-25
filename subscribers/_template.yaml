@@ -6,14 +6,19 @@
 # Any setting from config.yaml (days_back, max_papers, model, ranking: ...) can be overridden here.
 name: "Example Lab"
 
-query: "single cell AND spatial transcriptomics"   # PubMed search box syntax
+# EITHER a boolean query (words, "phrases", AND/OR/NOT, parentheses), translated for every source.
+# Preview:  python -m digest.query '"single cell" AND ("spatial transcriptomics" OR "spatial omics")'
+query: '"single cell" AND ("spatial transcriptomics" OR "spatial omics")'
+# OR a plain-English topic instead of query: (Kimi writes the boolean query on each run):
+# topic: "single-cell and spatial transcriptomics methods"
 
-# Optional extra sources, each with its own query (delete the ones you don't want)
+# Extra sources besides PubMed (delete the ones you don't want). Add query: to one to override
+# the translated query in that source's own syntax.
 sources:
-  europepmc:        {enabled: true, query: '"single cell" AND "spatial transcriptomics"'}
-  openalex:         {enabled: true, query: '"single cell" AND "spatial transcriptomics"'}
-  semantic_scholar: {enabled: true, query: "single cell spatial transcriptomics"}
-  arxiv:            {enabled: true, query: 'abs:"single cell" AND abs:"spatial transcriptomics"'}
+  europepmc:        {enabled: true}
+  openalex:         {enabled: true}
+  semantic_scholar: {enabled: true}
+  arxiv:            {enabled: true}
 
 journals: []                  # only these journals (preprints are dropped when set)
 # days_back: 7
