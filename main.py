@@ -6,6 +6,7 @@ The steps live in digest/ (see digest/__init__.py for the map).
 Subscribers:   one file each in subscribers/ (copy subscribers/_template.yaml)
 Shared config: config.yaml (defaults; a subscriber's file overrides them)
 Already sent:  seen/<subscriber>.json
+All ranked:    history/<subscriber>.jsonl (every candidate with its score, for trend summaries)
 
 Run all:          python main.py
 One subscriber:   python main.py --subscriber wang_lab
@@ -19,6 +20,7 @@ import requests
 
 from digest import notify, openalex, paper, ranking, sources, summarizer
 from digest.config import load_subscribers
+from digest.history import save_history
 from digest.store import load_seen, run_lock, save_seen
 
 
@@ -43,6 +45,8 @@ def run_subscriber(sub, dry_run=False):
     top = [p for p in papers if p["passed"]][:sub["max_papers"]]
     if not top:
         print("No papers passed the filters.")
+        if not dry_run:
+            save_history(sub["id"], papers, posted=[])
         return []
 
     for p in top:                           # once, shared by every chat
@@ -54,6 +58,8 @@ def run_subscriber(sub, dry_run=False):
         if not dry_run:
             save_seen(sub["id"], set().union(*(paper.ids(p) for p in top)))
         print(f"Done: posted {len(top)} of {len(papers)} candidates to {' and '.join(posted)}.")
+    if not dry_run:                         # every ranked candidate, for trend summaries
+        save_history(sub["id"], papers, posted=top if posted else [])
     return failed
 
 

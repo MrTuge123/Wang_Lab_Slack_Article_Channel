@@ -11,6 +11,7 @@
     notify/        build and send the digest to Slack / WeCom / email
     env.py         read secrets from .env or GitHub
     store.py       what each subscriber has already received (seen/), run lock
+    history.py     every ranked candidate with its score (history/), for trend summaries
 """
 from dotenv import load_dotenv
 

@@ -1,0 +1,3 @@
+# history files hold one paper per line. When a pull merges two versions, keep the lines from
+# both instead of stopping with a conflict; the next run folds lines of the same paper back into one.
+history/*.jsonl merge=union

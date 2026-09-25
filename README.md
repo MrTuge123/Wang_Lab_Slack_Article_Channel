@@ -14,6 +14,7 @@ digest/ranking.py       score, filter, sort
 digest/summarizer.py    Kimi summaries
 digest/notify/          slack.py, wecom.py, mail.py (one module per chat)
 digest/store.py         seen/ files and the run lock  (python -m digest.store merge FROM INTO)
+digest/history.py       history/ files: every ranked candidate  (python -m digest.history merge FROM INTO)
 ```
 
 ## Subscribers
@@ -77,9 +78,9 @@ For each subscriber in turn (one failing doesn't stop the others):
 8. **Keep the top s = 5.**
 9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits. A paper going to several subscribers is summarized once.
 10. **Post:** one digest with title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom, email). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
-11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them).
+11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them). Every ranked candidate, posted or not, also goes to `history/<name>.jsonl` (one paper per line, with its score, rank, journal citedness, key authors' h-index, keywords, abstract and summary) for trend summaries. A paper already there (any shared ID) updates its line instead of being added again; `first_seen`, `last_seen` and `posted_at` record when.
 
-Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` with anything pushed during the run.
+Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` and `history/` with anything pushed during the run. `.gitattributes` lets `git pull` merge `history/` files line by line instead of stopping with a conflict.
 
 **Check a subscriber's sources** without ranking or posting: `python -m digest.sources <name>` lists what each source found and the merged papers.
 

@@ -43,24 +43,28 @@ jobs:
           SUBSCRIBER: ${{ inputs.subscriber }}
         run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 
-      - name: Save seen/
+      - name: Save seen/ and history/
         if: ${{ !cancelled() }}   # also when one chat failed, so the other doesn't get repeats
         run: |
-          [ -d seen ] || exit 0
+          [ -d seen ] || [ -d history ] || exit 0
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          rm -rf "$RUNNER_TEMP/ours" && cp -r seen "$RUNNER_TEMP/ours"
-          # If seen/ was pushed from elsewhere during the run (e.g. a laptop), merge both
-          # lists onto the latest commit instead of failing or overwriting; retry if it races again.
+          rm -rf "$RUNNER_TEMP/ours" && mkdir "$RUNNER_TEMP/ours"
+          for d in seen history; do [ -d "$d" ] && cp -r "$d" "$RUNNER_TEMP/ours/"; done
+          # If seen/ or history/ was pushed from elsewhere during the run (e.g. a laptop), merge
+          # both versions onto the latest commit instead of failing or overwriting; retry if it races again.
           for attempt in 1 2 3; do
             git fetch --quiet origin "$GITHUB_REF_NAME"
             git reset --quiet --hard "origin/$GITHUB_REF_NAME"
-            for f in "$RUNNER_TEMP"/ours/*.json; do
+            for f in "$RUNNER_TEMP"/ours/seen/*.json; do
               [ -e "$f" ] && python -m digest.store merge "$f" "seen/$(basename "$f")"
             done
-            git add seen
+            for f in "$RUNNER_TEMP"/ours/history/*.jsonl; do
+              [ -e "$f" ] && python -m digest.history merge "$f" "history/$(basename "$f")"
+            done
+            for d in seen history; do [ -d "$d" ] && git add "$d"; done
             git diff --cached --quiet && exit 0
-            git commit --quiet -m "Update seen/ [skip ci]"
+            git commit --quiet -m "Update seen/ and history/ [skip ci]"
             git push --quiet && exit 0
             echo "Push rejected (attempt $attempt), merging again..."
             sleep $((attempt * 5))
