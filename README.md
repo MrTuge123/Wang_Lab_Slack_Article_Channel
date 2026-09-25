@@ -5,7 +5,8 @@
 ```
 main.py                 entry point: loops over subscribers, runs the steps below
 digest/config.py        loads config.yaml + subscribers/*.yaml
-digest/pubmed.py        search PubMed, fetch paper details
+digest/paper.py         one paper record: IDs, link, merging duplicates
+digest/sources/         pubmed, europepmc, openalex, semantic_scholar, arxiv  (python -m digest.sources <subscriber>)
 digest/openalex.py      author h-index, journal citedness  (python -m digest.openalex "Author Name")
 digest/ranking.py       score, filter, sort
 digest/summarizer.py    Kimi summaries
@@ -30,22 +31,29 @@ Each subscriber (a lab or channel) is one file in `subscribers/`, with its own q
 
 For each subscriber in turn (one failing doesn't stop the others):
 
-1. **Load settings:** `config.yaml` defaults + `subscribers/<name>.yaml`, and `.env` (webhook URLs, Kimi, NCBI and OpenAlex keys).
-2. **Search PubMed:** up to k = 50 papers matching the query, added in the last n = 30 days, sorted by PubMed Best Match. The `journals:` whitelist is applied here if set.
-3. **Drop seen papers:** skip any PMID or DOI already in `seen/<name>.json` (locally, the copy on GitHub is checked too).
-4. **Fetch details:** title, journal, abstract, DOI, authors, and author keywords for each paper from PubMed.
-5. **Enrich via OpenAlex:** find each paper by DOI (falling back to PMID), then look up the h-index of the key authors and keep the highest: co-first authors (PubMed's equal-contribution flags, else the first author) and corresponding authors (OpenAlex, else the last author). Also look up the journal's 2-year mean citedness. Papers not in OpenAlex yet get a neutral score.
-6. **Score:** `0.6 × author score + 0.4 × journal score`, each capped at 1. Preferred authors or journals get full marks on that part. Then add `keyword_credit` (0.1) for each of the subscriber's `key_words` found in the paper's author keywords.
-7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness`, and `keep_unmatched`. All are currently off, and preferred authors and journals always pass. The ranking table is printed here.
+1. **Load settings:** `config.yaml` defaults + `subscribers/<name>.yaml`, and `.env` (webhook URLs, Kimi, NCBI, OpenAlex and optional Semantic Scholar keys).
+2. **Search every source switched on, in parallel:** each with the subscriber's own query for that source, up to k = 50 papers each from the last n = 30 days. If a source fails, the others still run.
+   - **PubMed:** papers added in the window, sorted by Best Match; the `journals:` whitelist is applied in the query.
+   - **Europe PMC:** PubMed plus bioRxiv/medRxiv preprints and more (by first publication date).
+   - **OpenAlex:** journals, conferences and preprints in every field (by publication date).
+   - **Semantic Scholar:** strong on CS/AI (plain keywords; set `SEMANTIC_SCHOLAR_API_KEY` to avoid rate limits).
+   - **arXiv:** preprints submitted in the window.
+3. **Merge duplicates:** records sharing a PMID, DOI, arXiv ID or title become one paper; a published version replaces its preprint. With a `journals:` whitelist, papers from other sources must match it (preprints are dropped).
+4. **Drop seen papers:** skip any paper with an ID already in `seen/<name>.json` (locally, the copy on GitHub is checked too).
+5. **Enrich via OpenAlex:** find each paper (reusing OpenAlex search results, else by DOI, PMID or OpenAlex ID), then look up the h-index of the key authors and keep the highest: co-first authors (PubMed's equal-contribution flags, else the first author) and corresponding authors (OpenAlex, else the last author). Also look up the journal's 2-year mean citedness, and fill in keywords for papers whose source had none. Papers not in OpenAlex yet get a neutral score.
+6. **Score:** `0.6 × author score + 0.4 × journal score`, each capped at 1. Preprints get `preprint_journal_score` (0.3) for the journal part. Preferred authors or journals get full marks on that part. Then add `keyword_credit` (0.1) for each of the subscriber's `key_words` found in the paper's keywords.
+7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness` (not for preprints), `keep_unmatched` and `keep_preprints`. The filters are currently off, and preferred authors and journals always pass. The ranking table (with which sources found each paper) is printed here.
 8. **Keep the top s = 5.**
 9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits. A paper going to several subscribers is summarized once.
-10. **Post:** one digest with title, link, journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom; email is reserved and not built yet). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
-11. **Save:** add the posted papers' PMIDs and DOIs to `seen/<name>.json` (if at least one chat got them).
+10. **Post:** one digest with title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom; email is reserved and not built yet). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
+11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them).
 
 Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` with anything pushed during the run.
 
+**Check a subscriber's sources** without ranking or posting: `python -m digest.sources <name>` lists what each source found and the merged papers.
+
 
 ## TODO:
-1. ranking algorithm (similarity PubMed), authors ranking, journals (impact factor DB, csv)
+1. ranking algorithm (similarity to query / lab papers), authors ranking, journals (impact factor DB, csv)
 2. scihub
 3. Interactive API?

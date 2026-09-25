@@ -1,7 +1,8 @@
 """Paper digest: find new papers, rank them, summarize them, post them to each subscriber's chats.
 
     config.py      load config.yaml + subscribers/*.yaml
-    pubmed.py      search PubMed and fetch paper details
+    paper.py       one paper record: IDs, link, merging duplicates
+    sources/       PubMed, Europe PMC, OpenAlex, Semantic Scholar, arXiv (+ search_all)
     openalex.py    author h-index and journal citedness (+ author-ID lookup CLI)
     ranking.py     score, filter and sort papers
     summarizer.py  2-3 sentence summaries with Kimi

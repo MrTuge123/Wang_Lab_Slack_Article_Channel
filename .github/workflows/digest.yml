@@ -36,6 +36,7 @@ jobs:
           MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}   # optional
           # Webhook URLs: each subscriber's webhook_env is looked up among the repository
           # secrets, so adding a subscriber only needs a new secret, not an edit here.
           GITHUB_SECRETS_JSON: ${{ toJSON(secrets) }}

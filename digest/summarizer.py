@@ -4,8 +4,10 @@ import time
 
 from openai import OpenAI, RateLimitError
 
+from digest import paper as _paper
+
 _client = None
-_cache = {}          # (pmid, model) -> summary: a paper two subscribers get is summarized once
+_cache = {}          # (paper key, model) -> summary: a paper two subscribers get is summarized once
 
 
 def _kimi():
@@ -18,7 +20,7 @@ def _kimi():
 def summarize(paper, model):
     if not paper["abstract"]:
         return "No abstract available."
-    key = (paper["pmid"], model)
+    key = (_paper.key(paper), model)
     if key in _cache:
         return _cache[key]
     for attempt in range(5):                # new Kimi accounts allow only 3 requests/min

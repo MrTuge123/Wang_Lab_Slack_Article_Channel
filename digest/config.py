@@ -33,8 +33,10 @@ def load_subscribers(only=None):
             sys.exit(f"{path}: use only letters, digits, - and _ in subscriber file names")
         with open(path) as f:
             sub = _deep_merge(shared, yaml.safe_load(f) or {})
-        if not sub.get("query"):
-            sys.exit(f"{path}: 'query' is missing")
+        from digest.sources import check          # (here to avoid a circular import)
+        problems = check(sub)
+        if problems:
+            sys.exit(f"{path}: " + "; ".join(problems))
         sub["id"] = sid
         sub["file"] = path
         sub.setdefault("name", sid)

@@ -1,4 +1,5 @@
-"""For each subscriber: fetch new PubMed papers, rank them by author/journal impact (OpenAlex),
+"""For each subscriber: search PubMed, Europe PMC, OpenAlex, Semantic Scholar and arXiv for new
+papers, merge duplicates, rank them by author/journal impact (OpenAlex),
 summarize the top ones with Kimi, and post to that subscriber's Slack / WeCom.
 The steps live in digest/ (see digest/__init__.py for the map).
 
@@ -16,7 +17,7 @@ import traceback
 
 import requests
 
-from digest import notify, openalex, pubmed, ranking, summarizer
+from digest import notify, openalex, paper, ranking, sources, summarizer
 from digest.config import load_subscribers
 from digest.store import load_seen, run_lock, save_seen
 
@@ -25,12 +26,12 @@ def run_subscriber(sub, dry_run=False):
     """The whole digest for one subscriber. Returns the chats that failed (empty if none)."""
     print(f"\n========== {sub['name']} ({sub['id']}) ==========")
     seen = load_seen(sub["id"])
-    pmids = [p for p in pubmed.search(sub) if p not in seen]
-    if not pmids:
+    papers, report = sources.search_all(sub)
+    print("Found:", sources.describe(report))
+    papers = [p for p in papers if not paper.ids(p) & seen]      # any shared ID = already sent
+    if not papers:
         print("No new papers found.")
         return []
-
-    papers = [p for p in pubmed.fetch_details(pmids) if p["doi"] not in seen]
     print(f"{len(papers)} new candidates. Looking up authors/journals in OpenAlex...")
     try:
         openalex.enrich(papers)
@@ -51,7 +52,7 @@ def run_subscriber(sub, dry_run=False):
     posted, failed = notify.post(top, sub, dry_run)
     if posted:                              # at least one chat has them, so don't post them again
         if not dry_run:
-            save_seen(sub["id"], {p["pmid"] for p in top} | {p["doi"] for p in top if p["doi"]})
+            save_seen(sub["id"], set().union(*(paper.ids(p) for p in top)))
         print(f"Done: posted {len(top)} of {len(papers)} candidates to {' and '.join(posted)}.")
     return failed
 

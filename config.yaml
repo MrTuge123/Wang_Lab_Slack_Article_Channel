@@ -4,8 +4,20 @@
 
 model: "kimi-k2.6"
 pubmed_sort: relevance    # "relevance" (PubMed Best Match) or "pub_date"
-days_back: 30             # n: papers added to PubMed in the last n days
-candidate_pool: 50        # k: papers pulled from PubMed before ranking
+days_back: 30             # n: papers from the last n days (added to PubMed / published / submitted)
+candidate_pool: 50        # k: papers pulled from each source before ranking (per-source override:
+                          #    sources.<name>.candidate_pool)
+
+# ---- Where to search ----
+# Each subscriber switches sources on and gives each its own query (the syntax differs per source).
+# PubMed uses the subscriber's top-level query: unless sources.pubmed.query is set.
+# The same paper found in several sources is posted once.
+sources:
+  pubmed:           {enabled: true}
+  europepmc:        {enabled: false}
+  openalex:         {enabled: false}
+  semantic_scholar: {enabled: false}
+  arxiv:            {enabled: false}
 max_papers: 5             # s: papers posted per subscriber
 
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
@@ -27,5 +39,9 @@ ranking:
   # New papers are sometimes not in OpenAlex yet
   keep_unmatched: true
   unmatched_score: 0.3
+
+  # Preprints have no journal: they get this journal score instead, and skip min_journal_citedness
+  preprint_journal_score: 0.3
+  keep_preprints: true         # false = never post preprints
 
   keyword_credit: 0.1          # added per matched keyword

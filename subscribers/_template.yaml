@@ -7,7 +7,15 @@
 name: "Example Lab"
 
 query: "single cell AND spatial transcriptomics"   # PubMed search box syntax
-journals: []
+
+# Optional extra sources, each with its own query (delete the ones you don't want)
+sources:
+  europepmc:        {enabled: true, query: '"single cell" AND "spatial transcriptomics"'}
+  openalex:         {enabled: true, query: '"single cell" AND "spatial transcriptomics"'}
+  semantic_scholar: {enabled: true, query: "single cell spatial transcriptomics"}
+  arxiv:            {enabled: true, query: 'abs:"single cell" AND abs:"spatial transcriptomics"'}
+
+journals: []                  # only these journals (preprints are dropped when set)
 # days_back: 7
 # max_papers: 3
 

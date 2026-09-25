@@ -1,7 +1,7 @@
 """Slack incoming webhook."""
 import requests
 
-from digest import pubmed
+from digest import paper
 from digest.notify.format import impact_line
 
 NAME = "Slack"
@@ -14,10 +14,10 @@ def esc(text):
 
 def build(top, sub):
     """The digest as Slack mrkdwn: one message."""
-    lines = [f":newspaper: *New papers* for `{esc(sub['query'])}` "
+    lines = [f":newspaper: *New papers* for {esc(sub['name'])} "
              f"(last {sub['days_back']} days)\n"]
     for p in top:
-        lines.append(f"*<{pubmed.url(p)}|{esc(p['title'])}>*\n"
+        lines.append(f"*<{paper.url(p)}|{esc(p['title'])}>*\n"
                      f"_{esc(impact_line(p))}_\n"
                      f"{esc(p['summary'])}\n")
     return ["\n".join(lines)]

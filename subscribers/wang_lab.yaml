@@ -4,7 +4,24 @@ name: "Wang Lab"
 # PubMed search terms (same syntax as the PubMed search box)
 query: "graph neural network AND knowledge graph"
 
-# Optional: hard filter, only these journals (leave the list empty [] for all journals)
+# Where else to search, each with its own query (syntax differs; see the comments).
+# PubMed uses query: above.
+sources:
+  europepmc:          # PubMed + bioRxiv/medRxiv preprints and more; like PubMed without [tags]
+    enabled: true
+    query: '"graph neural network" AND "knowledge graph"'
+  openalex:           # everything: journals, conferences, preprints; words/"phrases" with AND OR NOT
+    enabled: true
+    query: '"graph neural network" AND "knowledge graph"'
+  semantic_scholar:   # strong on CS/AI; plain keywords only, no AND/OR
+    enabled: true
+    query: "graph neural network knowledge graph"
+  arxiv:              # preprints; fields ti: abs: au: cat: all:, with AND OR ANDNOT
+    enabled: true
+    query: 'abs:"graph neural network" AND abs:"knowledge graph"'
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals).
+# Preprints are dropped when this is set.
 journals: []
 #  - "Nature"
 #  - "Environmental Science & Technology"

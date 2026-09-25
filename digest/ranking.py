@@ -22,7 +22,7 @@ def keyword_hits(p, rank):
 def is_preferred_author(p, rank):
     prefs = {_norm(a) for a in rank.get("preferred_authors") or []}
     ids = {_norm(i) for i in p.get("author_ids", [])}
-    names = {_norm(n) for n in p.get("author_names", []) + p["pubmed_authors"]}
+    names = {_norm(n) for n in p.get("author_names", []) + p["authors"]}
     return bool(prefs & (ids | names))
 
 
@@ -49,6 +49,8 @@ def score(p, rank):
         j = min(journal_citedness(p) / rank.get("journal_citedness_cap", 10), 1)
     else:
         a = j = rank.get("unmatched_score", 0.3)
+    if p.get("preprint"):                      # no journal yet: neutral journal score
+        j = rank.get("preprint_journal_score", rank.get("unmatched_score", 0.3))
     if is_preferred_author(p, rank):
         a = 1.0
     if is_preferred_journal(p, rank):
@@ -62,10 +64,13 @@ def passes_filters(p, rank):
         return True
     if p["score"] < rank.get("min_score", 0):
         return False
+    if p.get("preprint") and not rank.get("keep_preprints", True):
+        return False
     if not p.get("oa_matched"):
         return rank.get("keep_unmatched", True)
     return (author_h(p) >= rank.get("min_author_h_index", 0)
-            and journal_citedness(p) >= rank.get("min_journal_citedness", 0))
+            and (p.get("preprint")                # no journal to hold to min_journal_citedness
+                 or journal_citedness(p) >= rank.get("min_journal_citedness", 0)))
 
 
 def rank_papers(papers, rank):
@@ -77,12 +82,17 @@ def rank_papers(papers, rank):
     return sorted(papers, key=lambda p: p["score"], reverse=True)
 
 
+SOURCE_ABBR = {"PubMed": "PM", "Europe PMC": "EP", "OpenAlex": "OA", "Semantic Scholar": "S2", "arXiv": "AX"}
+
+
 def print_ranking(papers):
-    print(f"\n{'score':>5}  {'h':>4}  {'role':<22}  {'jrnl':>5}  {'kw':>2}  pass  title")
+    print(f"\n{'score':>5}  {'h':>4}  {'role':<22}  {'jrnl':>5}  {'kw':>2}  pass  {'found in':<14}  title")
     for p in papers:
         flag = "yes" if p["passed"] else "no"
-        tag = "" if p.get("oa_matched") else " [not in OpenAlex]"
+        tag = ("" if p.get("oa_matched") else " [not in OpenAlex]") + (" [preprint]" if p.get("preprint") else "")
         role = (p.get("top_author") or {}).get("role", "")
-        print(f"{p['score']:>5.2f}  {author_h(p):>4}  {role:<22}  {journal_citedness(p):>5}  "
-              f"{len(p['keyword_hits']):>2}  {flag:<4}  {p['title'][:60]}{tag}")
-    print()
+        found = ",".join(SOURCE_ABBR.get(s, s) for s in p["sources"])
+        jrnl = "-" if p.get("preprint") else journal_citedness(p)
+        print(f"{p['score']:>5.2f}  {author_h(p):>4}  {role:<22}  {jrnl:>5}  "
+              f"{len(p['keyword_hits']):>2}  {flag:<4}  {found:<14}  {p['title'][:60]}{tag}")
+    print("(found in: PM PubMed, EP Europe PMC, OA OpenAlex, S2 Semantic Scholar, AX arXiv)\n")
