@@ -8,7 +8,7 @@ NAME = "WeCom"
 MAX_BYTES = 4096                        # WeCom rejects longer markdown messages
 
 
-def build(top, sub):
+def build(top, sub, context=None):
     """The digest in WeCom markdown, packed into as few messages as its size limit allows."""
     blocks = [f"📰 **New papers** for {sub['name']} (last {sub['days_back']} days)"]
     for p in top:

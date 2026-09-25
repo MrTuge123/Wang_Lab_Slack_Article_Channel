@@ -49,7 +49,7 @@ def run_subscriber(sub, dry_run=False):
         print("Summarizing:", p["title"][:80])
         p["summary"] = summarizer.summarize(p, sub["model"])
 
-    posted, failed = notify.post(top, sub, dry_run)
+    posted, failed = notify.post(top, sub, dry_run, {"candidates": len(papers), "found": report})
     if posted:                              # at least one chat has them, so don't post them again
         if not dry_run:
             save_seen(sub["id"], set().union(*(paper.ids(p) for p in top)))

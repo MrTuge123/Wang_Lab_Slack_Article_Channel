@@ -12,7 +12,7 @@ def esc(text):
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def build(top, sub):
+def build(top, sub, context=None):
     """The digest as Slack mrkdwn: one message."""
     lines = [f":newspaper: *New papers* for {esc(sub['name'])} "
              f"(last {sub['days_back']} days)\n"]
