@@ -38,4 +38,5 @@ outputs:
     enabled: false
     webhook_env: WECOM_URL_EXAMPLE_LAB
   email:
-    enabled: false            # not built yet
+    enabled: false
+    to: []                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)

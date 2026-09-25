@@ -46,7 +46,8 @@ outputs:
     enabled: false
     webhook_env: SLACK_WEBHOOK_URL
   wecom:
-    enabled: true
+    enabled: false
     webhook_env: WeCom_URL
   email:
-    enabled: true             # not built yet: only prints a note
+    enabled: true            # sender account: SMTP_* secrets (see digest/notify/mail.py)
+    to: ['qianhanyu722@gmail.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB

@@ -12,7 +12,7 @@ digest/llm.py           Kimi client with rate-limit retries
 digest/openalex.py      author h-index, journal citedness  (python -m digest.openalex "Author Name")
 digest/ranking.py       score, filter, sort
 digest/summarizer.py    Kimi summaries
-digest/notify/          slack.py, wecom.py (one module per chat; email goes here next)
+digest/notify/          slack.py, wecom.py, mail.py (one module per chat)
 digest/store.py         seen/ files and the run lock  (python -m digest.store merge FROM INTO)
 ```
 
@@ -44,6 +44,20 @@ Write the search once per subscriber, in one of two ways:
 
 To hand-tune one source, give it its own `query:` under `sources:` in that source's syntax; it overrides the translation. Preview: `python -m digest.query '<query>'` or `python -m digest.query --topic "<topic>"`.
 
+## Email
+
+The digest can also go out by email from a Gmail account with an app password.
+
+1. Sender account, as secrets (`.env` locally, GitHub → Settings → Secrets → Actions):
+   `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_USER=literaturebot99@gmail.com`, `SMTP_PASSWORD=<app password>`.
+2. Per subscriber, under `outputs:`:
+   ```yaml
+   email:
+     enabled: true
+     to: ["a@umich.edu"]        # or to_env: EMAIL_TO_WANG_LAB (a secret with comma-separated addresses)
+   ```
+   Recipients are Bcc'd. If the repository is public, prefer `to_env` so addresses aren't published.
+
 ## Current Pipeline
 
 For each subscriber in turn (one failing doesn't stop the others):
@@ -62,7 +76,7 @@ For each subscriber in turn (one failing doesn't stop the others):
 7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness` (not for preprints), `keep_unmatched` and `keep_preprints`. The filters are currently off, and preferred authors and journals always pass. The ranking table (with which sources found each paper) is printed here.
 8. **Keep the top s = 5.**
 9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits. A paper going to several subscribers is summarized once.
-10. **Post:** one digest with title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom; email is reserved and not built yet). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
+10. **Post:** one digest with title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom, email). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
 11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them).
 
 Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` with anything pushed during the run.

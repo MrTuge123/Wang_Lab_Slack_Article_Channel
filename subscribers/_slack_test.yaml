@@ -11,3 +11,6 @@
        webhook_env: SLACK_WEBHOOK_URL
      wecom:
        enabled: false
+     email:
+      enabled: true
+      to: ["tigercui@umich.edu"]
