@@ -98,6 +98,20 @@ def url(p):
     return p.get("link") or (f"https://doi.org/{p['doi']}" if p.get("doi") else "")
 
 
+def links(p):
+    """[(label, url)] for every place to read the paper, best first."""
+    out = []
+    if p.get("pmid"):
+        out.append(("PubMed", f"https://pubmed.ncbi.nlm.nih.gov/{p['pmid']}/"))
+    if p.get("doi") and not p["doi"].startswith(ARXIV_DOI_PREFIX):
+        out.append(("Publisher", f"https://doi.org/{p['doi']}"))
+    if p.get("arxiv_id"):
+        out.append(("arXiv", f"https://arxiv.org/abs/{p['arxiv_id']}"))
+    if not out and url(p):
+        out.append(("Link", url(p)))
+    return out
+
+
 def _absorb(a, b):
     """Fill gaps in a with b's details. A published version (b) replaces a preprint (a)."""
     a["sources"] += [s for s in b["sources"] if s not in a["sources"]]
