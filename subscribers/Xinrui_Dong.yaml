@@ -49,5 +49,5 @@ outputs:
     enabled: true
     webhook_env: WeCom_URL
   email:
-    enabled: false            # sender account: SMTP_* secrets (see digest/notify/mail.py)
-    to: ['qianhanyu722@gmail.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    enabled: true           # sender account: SMTP_* secrets (see digest/notify/mail.py)
+    to: ['dongxinruidxr@163.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
