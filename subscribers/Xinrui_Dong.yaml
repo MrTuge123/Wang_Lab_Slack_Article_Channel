@@ -32,7 +32,7 @@ ranking:
   # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
   # "diabetic"; "multi-omics" doesn't match "multiomics".
   key_words: ["Triple-negative breast cancer", "TNBC", "Glucose metabolism", "Metabolic heterogeneity",
-              "Lactate signaling", "Metabolite-protein interaction"]
+              "Lactate signaling", "Metabolite-protein interaction","Clinical trials","Cancer"]
 
   # Hard filters (0 = off). Preferred authors/journals always pass.
   min_score: 0          # min weighted score to pass filter (0-1)
