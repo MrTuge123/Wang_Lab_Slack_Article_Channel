@@ -1,5 +1,7 @@
 """Pieces of the digest shared by every chat."""
 
+ZH_LABEL = "中文概要："                  # before the Chinese summary (摘要 would read as "abstract")
+
 
 def impact_line(p):
     """'Journal · top author: Name (first, h=40) · keywords: GNN · score 0.72'"""

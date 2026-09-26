@@ -20,7 +20,7 @@ from email.message import EmailMessage
 from email.utils import formataddr
 
 from digest import env, paper
-from digest.notify.format import impact_line
+from digest.notify.format import ZH_LABEL, impact_line
 
 NAME = "Email"
 SENDER_NAME = "Paper Digest"
@@ -82,6 +82,8 @@ def _paper_html(i, p):
         + (f'background:{ACCENT};color:#ffffff;' if j == 0 else f'border:1px solid {LINE};color:{ACCENT};')
         + f'">{e(label)}{" →" if j == 0 else ""}</a>'
         for j, (label, u) in enumerate(paper.links(p)))
+    zh = (f'<p style="color:{INK};font-size:14px;line-height:22px;margin:0 0 12px">'
+          f'<span style="color:{MUTED}">{e(ZH_LABEL)}</span>{e(p["summary_zh"])}</p>') if p.get("summary_zh") else ""
     return f"""
 <tr><td style="padding:22px 28px;border-top:1px solid {LINE}">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -94,7 +96,7 @@ def _paper_html(i, p):
       <div style="color:{MUTED};font-size:13px;line-height:19px;margin-top:4px">{meta}</div>
       <div style="color:{FAINT};font-size:12px;line-height:18px;margin-top:2px">{e(_authors(p))}</div>
       <div style="margin-top:8px">{chips}</div>
-      <p style="color:{INK};font-size:14px;line-height:21px;margin:6px 0 12px">{e(p["summary"])}</p>
+      <p style="color:{INK};font-size:14px;line-height:21px;margin:6px 0 12px">{e(p["summary"])}</p>{zh}
       <div>{buttons}</div>
     </td></tr></table>
 </td></tr>"""
@@ -119,6 +121,8 @@ def build(top, sub, context=None):
     for i, p in enumerate(top, 1):
         text += [f"{i}. {p['title']}", f"   {impact_line(p)}", f"   {_authors(p)}",
                  "", "   " + p["summary"], ""]
+        if p.get("summary_zh"):
+            text += ["   " + ZH_LABEL + p["summary_zh"], ""]
         text += [f"   {label}: {u}" for label, u in paper.links(p)] + [""]
     text += ["Searched: " + ", ".join(searched)]
 

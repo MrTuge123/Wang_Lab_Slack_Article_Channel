@@ -49,9 +49,12 @@ def run_subscriber(sub, dry_run=False):
             save_history(sub["id"], papers, posted=[])
         return []
 
+    chinese = notify.wants_chinese(sub)     # some chat has chinese_summary: true
     for p in top:                           # once, shared by every chat
         print("Summarizing:", p["title"][:80])
         p["summary"] = summarizer.summarize(p, sub["model"])
+        if chinese:                         # extra, not saved to history/
+            p["summary_zh"] = summarizer.to_chinese(p, sub["model"])
 
     posted, failed = notify.post(top, sub, dry_run, {"candidates": len(papers), "found": report})
     if posted:                              # at least one chat has them, so don't post them again

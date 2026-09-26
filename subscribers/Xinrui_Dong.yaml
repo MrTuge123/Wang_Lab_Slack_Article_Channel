@@ -4,7 +4,7 @@ name: "Xinrui Dong"
 # What to search for: EITHER a boolean query, translated into every source's syntax...
 #   words or "quoted phrases", AND / OR / NOT (upper case), parentheses. PubMed gets it as written.
 #   Preview each source's version:  python -m digest.query '<your query>'
-query: '("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR glycolytic OR lactate)'
+query: '(("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR glycolytic OR lactate)) NOT ("glucose sensor" OR "lactate sensor" OR biosensor OR "electrochemical sensor" OR electrode)'
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 
@@ -25,7 +25,7 @@ journals: []
 ranking:
   # Always score full marks for these. Authors: OpenAlex ID (safer, e.g. "A5023888391")
   # or exact name. Find IDs with:  python -m digest.openalex "Author Name"
-  preferred_authors: []
+  preferred_authors: ["Shengcai Lin"]
   preferred_journals: []
 
   # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
@@ -41,13 +41,17 @@ ranking:
 # Where to post. webhook_env = the name of the secret holding the webhook URL
 
 # (in .env when running locally, a repository secret on GitHub).
+# chinese_summary: true adds a Chinese translation under each English summary, in that chat only.
 outputs:
   slack:
     enabled: false
     webhook_env: SLACK_WEBHOOK_URL
+    chinese_summary: false
   wecom:
-    enabled: true
+    enabled: false
     webhook_env: WeCom_URL
+    chinese_summary: false
   email:
     enabled: true           # sender account: SMTP_* secrets (see digest/notify/mail.py)
     to: ['dongxinruidxr@163.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    chinese_summary: true

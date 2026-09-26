@@ -4,6 +4,9 @@ Each chat is a module here with NAME, build(top, sub, context) -> [messages] and
 Optional: destination(settings) -> (destination, None) or (None, what's missing)  [default: the
 webhook URL named by webhook_env], and preview(message) -> text for --dry-run [default: str].
 To add one: write the module and add it to CHATS.
+
+A paper's p["summary_zh"] (Chinese translation of the summary) reaches build() only for chats
+with chinese_summary: true; for the others it's None, so build() just shows it when it's there.
 """
 import requests
 
@@ -17,6 +20,13 @@ def _webhook_destination(cfg):
     name = cfg.get("webhook_env")
     url = env.get(name)
     return (url, None) if url else (None, f"{name or 'its webhook_env'} isn't set (.env locally, GitHub secret in Actions)")
+
+
+def wants_chinese(sub):
+    """True if any chat that's switched on has chinese_summary: true."""
+    outputs = sub.get("outputs") or {}
+    return any((outputs.get(k) or {}).get("enabled") and (outputs.get(k) or {}).get("chinese_summary")
+               for k in CHATS)
 
 
 def post(top, sub, dry_run=False, context=None):
@@ -35,7 +45,8 @@ def post(top, sub, dry_run=False, context=None):
             print(f"Warning: {chat.NAME} is switched on, but {problem}")
             failed.append(chat.NAME)
             continue
-        messages = chat.build(top, sub, context)
+        papers = top if outputs[key].get("chinese_summary") else [{**p, "summary_zh": None} for p in top]
+        messages = chat.build(papers, sub, context)
         preview = getattr(chat, "preview", str)
         try:
             for i, message in enumerate(messages, 1):

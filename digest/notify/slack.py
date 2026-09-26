@@ -2,7 +2,7 @@
 import requests
 
 from digest import paper
-from digest.notify.format import impact_line
+from digest.notify.format import ZH_LABEL, impact_line
 
 NAME = "Slack"
 
@@ -17,9 +17,11 @@ def build(top, sub, context=None):
     lines = [f":newspaper: *New papers* for {esc(sub['name'])} "
              f"(last {sub['days_back']} days)\n"]
     for p in top:
+        zh = f"{ZH_LABEL}{esc(p['summary_zh'])}\n" if p.get("summary_zh") else ""
         lines.append(f"*<{paper.url(p)}|{esc(p['title'])}>*\n"
                      f"_{esc(impact_line(p))}_\n"
-                     f"{esc(p['summary'])}\n")
+                     f"{esc(p['summary'])}\n"
+                     f"{zh}")
     return ["\n".join(lines)]
 
 

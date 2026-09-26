@@ -2,7 +2,7 @@
 import requests
 
 from digest import paper
-from digest.notify.format import impact_line
+from digest.notify.format import ZH_LABEL, impact_line
 
 NAME = "WeCom"
 MAX_BYTES = 4096                        # WeCom rejects longer markdown messages
@@ -13,9 +13,10 @@ def build(top, sub, context=None):
     blocks = [f"📰 **New papers** for {sub['name']} (last {sub['days_back']} days)"]
     for p in top:
         title = p["title"].replace("[", "").replace("]", "")   # brackets would break the [title](url) link
+        zh = f"\n{ZH_LABEL}{p['summary_zh']}" if p.get("summary_zh") else ""
         blocks.append(f"[{title}]({paper.url(p)})\n"
                       f'<font color="comment">{impact_line(p)}</font>\n'
-                      f"{p['summary']}")
+                      f"{p['summary']}{zh}")
     messages = []
     for b in blocks:
         if messages and len((messages[-1] + "\n\n" + b).encode()) <= MAX_BYTES:
