@@ -55,8 +55,12 @@ def run_subscriber(sub, dry_run=False):
         p["summary"] = summarizer.summarize(p, sub["model"])
         if chinese:                         # extra, not saved to history/
             p["summary_zh"] = summarizer.to_chinese(p, sub["model"])
+    print("Writing the overview...")
+    overview = summarizer.overview(top, sub["model"])       # None for one paper, or if Kimi fails
+    context = {"candidates": len(papers), "found": report, "overview": overview,
+               "overview_zh": summarizer.translate_zh(overview, sub["model"]) if overview and chinese else None}
 
-    posted, failed = notify.post(top, sub, dry_run, {"candidates": len(papers), "found": report})
+    posted, failed = notify.post(top, sub, dry_run, context)
     if posted:                              # at least one chat has them, so don't post them again
         if not dry_run:
             save_seen(sub["id"], set().union(*(paper.ids(p) for p in top)))

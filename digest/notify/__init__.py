@@ -5,8 +5,9 @@ Optional: destination(settings) -> (destination, None) or (None, what's missing)
 webhook URL named by webhook_env], and preview(message) -> text for --dry-run [default: str].
 To add one: write the module and add it to CHATS.
 
-A paper's p["summary_zh"] (Chinese translation of the summary) reaches build() only for chats
-with chinese_summary: true; for the others it's None, so build() just shows it when it's there.
+A paper's p["summary_zh"] and the digest's context["overview_zh"] (Chinese translations) reach
+build() only for chats with chinese_summary: true; for the others they're None, so build() just
+shows them when they're there.
 """
 import requests
 
@@ -31,8 +32,10 @@ def wants_chinese(sub):
 
 def post(top, sub, dry_run=False, context=None):
     """Post the digest to the subscriber's chats. Returns (posted, failed) chat names.
-    With dry_run, prints the messages instead of sending them. context: run stats for the
-    message ({"candidates": int, "found": {source: count}}), optional."""
+    With dry_run, prints the messages instead of sending them. context (optional): run stats and
+    the digest's overview ({"candidates": int, "found": {source: count}, "overview": str or None,
+    "overview_zh": str or None})."""
+    context = context or {}
     outputs = sub.get("outputs") or {}
     keys = [k for k in CHATS if (outputs.get(k) or {}).get("enabled")]
     if not keys:
@@ -45,8 +48,11 @@ def post(top, sub, dry_run=False, context=None):
             print(f"Warning: {chat.NAME} is switched on, but {problem}")
             failed.append(chat.NAME)
             continue
-        papers = top if outputs[key].get("chinese_summary") else [{**p, "summary_zh": None} for p in top]
-        messages = chat.build(papers, sub, context)
+        if outputs[key].get("chinese_summary"):
+            papers, ctx = top, context
+        else:
+            papers, ctx = [{**p, "summary_zh": None} for p in top], {**context, "overview_zh": None}
+        messages = chat.build(papers, sub, ctx)
         preview = getattr(chat, "preview", str)
         try:
             for i, message in enumerate(messages, 1):
