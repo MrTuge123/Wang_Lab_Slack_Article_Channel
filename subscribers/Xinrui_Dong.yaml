@@ -48,9 +48,9 @@ outputs:
     webhook_env: SLACK_WEBHOOK_URL
     chinese_summary: false
   wecom:
-    enabled: false
+    enabled: true
     webhook_env: WeCom_URL
-    chinese_summary: false
+    chinese_summary: true
   email:
     enabled: true           # sender account: SMTP_* secrets (see digest/notify/mail.py)
     to: ['dongxinruidxr@163.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
