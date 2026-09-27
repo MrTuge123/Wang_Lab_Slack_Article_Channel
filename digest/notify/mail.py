@@ -20,7 +20,7 @@ from email.message import EmailMessage
 from email.utils import formataddr
 
 from digest import env, paper
-from digest.notify.format import impact_line
+from digest.notify.format import ZH_LABEL, date_range, digest_title, impact_line, stats_line
 
 NAME = "Email"
 SENDER_NAME = "Paper Digest"
@@ -53,13 +53,6 @@ def _authors(p, n=3):
     return ", ".join(a) if len(a) <= n + 1 else ", ".join(a[:n]) + " … " + a[-1]
 
 
-def _date_range(sub):
-    end = dt.date.today()
-    start = end - dt.timedelta(days=sub["days_back"])
-    fmt = lambda d: f"{d:%b} {d.day}"
-    return f"{fmt(start)} – {fmt(end)}, {end.year}"
-
-
 def _chip(text, fg, bg):
     return (f'<span style="display:inline-block;padding:2px 8px;margin:0 4px 4px 0;border-radius:10px;'
             f'background:{bg};color:{fg};font-size:12px;line-height:18px">{html.escape(text)}</span>')
@@ -82,6 +75,8 @@ def _paper_html(i, p):
         + (f'background:{ACCENT};color:#ffffff;' if j == 0 else f'border:1px solid {LINE};color:{ACCENT};')
         + f'">{e(label)}{" →" if j == 0 else ""}</a>'
         for j, (label, u) in enumerate(paper.links(p)))
+    zh = (f'<p style="color:{INK};font-size:14px;line-height:22px;margin:0 0 12px">'
+          f'<span style="color:{MUTED}">{e(ZH_LABEL)}</span>{e(p["summary_zh"])}</p>') if p.get("summary_zh") else ""
     return f"""
 <tr><td style="padding:22px 28px;border-top:1px solid {LINE}">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
@@ -94,7 +89,7 @@ def _paper_html(i, p):
       <div style="color:{MUTED};font-size:13px;line-height:19px;margin-top:4px">{meta}</div>
       <div style="color:{FAINT};font-size:12px;line-height:18px;margin-top:2px">{e(_authors(p))}</div>
       <div style="margin-top:8px">{chips}</div>
-      <p style="color:{INK};font-size:14px;line-height:21px;margin:6px 0 12px">{e(p["summary"])}</p>
+      <p style="color:{INK};font-size:14px;line-height:21px;margin:6px 0 12px">{e(p["summary"])}</p>{zh}
       <div>{buttons}</div>
     </td></tr></table>
 </td></tr>"""
@@ -102,28 +97,40 @@ def _paper_html(i, p):
 
 def build(top, sub, context=None):
     """One email: an HTML newsletter plus a plain-text version.
-    context (optional): {"candidates": int, "found": {source name: count or error}}."""
+    context (optional): {"candidates": int, "found": {source name: count or error},
+    "overview": str or None, "overview_zh": str or None}."""
     context = context or {}
     today = dt.date.today()
     n = len(top)
     subject = f"{n} new paper{'s' * (n != 1)} for {sub['name']} · {today:%b} {today.day}"
     searched = [s for s in SOURCE_NAMES if isinstance((context.get("found") or {}).get(s), int)] \
         or [s for s in SOURCE_NAMES if s in {x for p in top for x in p.get("sources", [])}]
-    stats = f"{n} new paper{'s' * (n != 1)}"
-    if context.get("candidates"):
-        stats += f", picked from {context['candidates']} candidates"
+    stats = stats_line(top, context)
+    overview, overview_zh = context.get("overview"), context.get("overview_zh")
     e = html.escape
 
     # --- plain text
-    text = [f"{sub['name']} · weekly paper digest", f"{_date_range(sub)} · {stats}", ""]
+    text = [digest_title(sub), f"{date_range(sub)} · {stats}", ""]
+    if overview:
+        text += ["Overview: " + overview, ""] + ([ZH_LABEL + overview_zh, ""] if overview_zh else [])
     for i, p in enumerate(top, 1):
         text += [f"{i}. {p['title']}", f"   {impact_line(p)}", f"   {_authors(p)}",
                  "", "   " + p["summary"], ""]
+        if p.get("summary_zh"):
+            text += ["   " + ZH_LABEL + p["summary_zh"], ""]
         text += [f"   {label}: {u}" for label, u in paper.links(p)] + [""]
     text += ["Searched: " + ", ".join(searched)]
 
     # --- HTML
-    preheader = e(top[0]["title"]) if top else ""
+    preheader = e(overview or (top[0]["title"] if top else ""))
+    overview_html = ""
+    if overview:
+        zh = f'<div style="margin-top:6px">{e(ZH_LABEL)}{e(overview_zh)}</div>' if overview_zh else ""
+        overview_html = f"""
+    <tr><td style="padding:0 28px 22px">
+      <div style="background:{BG};border-radius:8px;padding:14px 16px;color:{INK};font-size:14px;line-height:21px">
+        <span style="font-weight:600">Overview</span> &nbsp;{e(overview)}{zh}</div>
+    </td></tr>"""
     body = f"""<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(subject)}</title></head>
 <body style="margin:0;padding:0;background:{BG}">
@@ -136,8 +143,8 @@ def build(top, sub, context=None):
       <div style="color:{ACCENT};font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase">
         Weekly paper digest</div>
       <div style="color:{INK};font-size:24px;font-weight:700;line-height:30px;margin-top:6px">{e(sub["name"])}</div>
-      <div style="color:{MUTED};font-size:14px;margin-top:4px">{e(_date_range(sub))} · {e(stats)}</div>
-    </td></tr>
+      <div style="color:{MUTED};font-size:14px;margin-top:4px">{e(date_range(sub))} · {e(stats)}</div>
+    </td></tr>{overview_html}
     {"".join(_paper_html(i, p) for i, p in enumerate(top, 1))}
     <tr><td style="padding:18px 28px 24px;border-top:1px solid {LINE};color:{FAINT};font-size:12px;line-height:18px">
       Searched {e(", ".join(searched))}. Ranked by author h-index, journal impact and keyword matches;

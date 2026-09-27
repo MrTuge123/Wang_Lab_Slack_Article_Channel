@@ -14,6 +14,7 @@ digest/ranking.py       score, filter, sort
 digest/summarizer.py    Kimi summaries
 digest/notify/          slack.py, wecom.py, mail.py (one module per chat)
 digest/store.py         seen/ files and the run lock  (python -m digest.store merge FROM INTO)
+digest/history.py       history/ files: every ranked candidate  (python -m digest.history merge FROM INTO)
 ```
 
 ## Subscribers
@@ -58,6 +59,10 @@ The digest can also go out by email from a Gmail account with an app password.
    ```
    Recipients are Bcc'd. If the repository is public, prefer `to_env` so addresses aren't published.
 
+### Chinese summaries
+
+Add `chinese_summary: true` under any chat in a subscriber's `outputs:` to add a Simplified Chinese translation (中文概要) under each English summary, and under the digest's overview, in that chat only. Kimi translates the English summary, keeping gene/drug names and abbreviations as written: one extra Kimi call per posted paper, made only if some switched-on chat asks for it. If the translation fails, the digest goes out with the English summary alone. The Chinese text isn't saved to `history/`.
+
 ## Current Pipeline
 
 For each subscriber in turn (one failing doesn't stop the others):
@@ -75,11 +80,11 @@ For each subscriber in turn (one failing doesn't stop the others):
 6. **Score:** `0.6 × author score + 0.4 × journal score`, each capped at 1. Preprints get `preprint_journal_score` (0.3) for the journal part. Preferred authors or journals get full marks on that part. Then add `keyword_credit` (0.1) for each of the subscriber's `key_words` found in the paper's keywords.
 7. **Filter:** apply `min_score`, `min_author_h_index`, `min_journal_citedness` (not for preprints), `keep_unmatched` and `keep_preprints`. The filters are currently off, and preferred authors and journals always pass. The ranking table (with which sources found each paper) is printed here.
 8. **Keep the top s = 5.**
-9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits. A paper going to several subscribers is summarized once.
-10. **Post:** one digest with title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary, sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom, email). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
-11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them).
+9. **Summarize with Kimi:** a 2–3 sentence summary per paper, retrying with waits on rate limits. A paper going to several subscribers is summarized once. Then one more call writes a 1–2 sentence overview of what the posted papers are about together (skipped for a single paper; if it fails, the digest goes out without it).
+10. **Post:** one digest that opens with the same header in every chat ("<name> · weekly paper digest", the dates searched, and "5 new papers, picked from 48 candidates") and the overview, then for each paper its title, link (PubMed, else DOI, else arXiv), journal, top author and h-index, matched keywords, score, and summary (plus a Chinese translation for chats with `chinese_summary: true`), sent to every chat switched on under the subscriber's `outputs:` (Slack, WeCom, email). WeCom gets it in as few messages as fit its 4096-byte limit. If one chat fails, the other still gets the digest. With `--dry-run`, it prints them instead.
+11. **Save:** add all of the posted papers' IDs (PMID, DOI, arXiv ID, title) to `seen/<name>.json` (if at least one chat got them). Every ranked candidate, posted or not, also goes to `history/<name>.jsonl` (one paper per line, with its score, rank, journal citedness, key authors' h-index, keywords, abstract and summary) for trend summaries. A paper already there (any shared ID) updates its line instead of being added again; `first_seen`, `last_seen` and `posted_at` record when.
 
-Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` with anything pushed during the run.
+Only one run at a time can go in a folder, and `seen/` files are written atomically. On GitHub, the save step merges `seen/` and `history/` with anything pushed during the run. `.gitattributes` lets `git pull` merge `history/` files line by line instead of stopping with a conflict.
 
 **Check a subscriber's sources** without ranking or posting: `python -m digest.sources <name>` lists what each source found and the merged papers.
 

@@ -72,15 +72,15 @@ def load_seen(sid):
     return read_seen(seen_path(sid)) | remote_seen(sid)
 
 
-def _write_seen(path, new_ids):
-    """Add new_ids to the seen file at path without losing anything written since the run started."""
-    seen = read_seen(path) | set(new_ids)
+def atomic_write(path, text, prefix):
+    """Write text to path through a temp file (named prefix*.tmp) that then replaces it,
+    so a crash can't leave the file half-written."""
     folder = os.path.dirname(os.path.abspath(path))
     os.makedirs(folder, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=folder, prefix=".seen-", suffix=".tmp")
+    fd, tmp = tempfile.mkstemp(dir=folder, prefix=prefix, suffix=".tmp")
     try:
-        with os.fdopen(fd, "w") as f:
-            json.dump(sorted(seen), f, indent=1)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
             f.flush()
             os.fsync(f.fileno())
         os.chmod(tmp, 0o644)
@@ -89,6 +89,12 @@ def _write_seen(path, new_ids):
         if os.path.exists(tmp):
             os.unlink(tmp)
         raise
+
+
+def _write_seen(path, new_ids):
+    """Add new_ids to the seen file at path without losing anything written since the run started."""
+    seen = read_seen(path) | set(new_ids)
+    atomic_write(path, json.dumps(sorted(seen), indent=1), prefix=".seen-")
 
 
 def save_seen(sid, new_ids):

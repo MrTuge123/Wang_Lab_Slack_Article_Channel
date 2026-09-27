@@ -30,13 +30,18 @@ ranking:
   key_words: []
   # min_author_h_index: 10
 
+# chinese_summary: true adds a Chinese translation under each English summary, in that chat only
+# (the English summary is always sent; the Chinese one isn't saved to history/).
 outputs:
   slack:
     enabled: true
     webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
+    chinese_summary: false
   wecom:
     enabled: false
     webhook_env: WECOM_URL_EXAMPLE_LAB
+    chinese_summary: false
   email:
     enabled: false
     to: []                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
+    chinese_summary: false

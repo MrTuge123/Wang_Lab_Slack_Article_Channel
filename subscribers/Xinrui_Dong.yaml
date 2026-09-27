@@ -1,10 +1,10 @@
 # Wang Lab. Any setting from config.yaml can be overridden here.
-name: "Wang Lab"
+name: "Xinrui Dong"
 
 # What to search for: EITHER a boolean query, translated into every source's syntax...
 #   words or "quoted phrases", AND / OR / NOT (upper case), parentheses. PubMed gets it as written.
 #   Preview each source's version:  python -m digest.query '<your query>'
-query: "graph neural network AND knowledge graph"
+query: '(("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR glycolytic OR lactate)) NOT ("glucose sensor" OR "lactate sensor" OR biosensor OR "electrochemical sensor" OR electrode)'
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 
@@ -25,27 +25,33 @@ journals: []
 ranking:
   # Always score full marks for these. Authors: OpenAlex ID (safer, e.g. "A5023888391")
   # or exact name. Find IDs with:  python -m digest.openalex "Author Name"
-  preferred_authors: []
+  preferred_authors: ["Shengcai Lin"]
   preferred_journals: []
 
   # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
   # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
   # "diabetic"; "multi-omics" doesn't match "multiomics".
-  key_words: ["multi-omics", "machine learning", "knowledge graph", "graph neural network",
-              "GNN", "deep learning", "AI", "artificial intelligence"]
+  key_words: ["Triple-negative breast cancer", "TNBC", "Glucose metabolism", "Metabolic heterogeneity",
+              "Lactate signaling", "Metabolite-protein interaction","Clinical trials","Cancer"]
 
+  # Hard filters (0 = off). Preferred authors/journals always pass.
+  min_score: 0          # min weighted score to pass filter (0-1)
+  min_author_h_index: 5        # min h-index of the paper's top co-first/corresponding author
+  min_journal_citedness: 10     # min journal's 2-year mean citations (~ impact factor)
 # Where to post. webhook_env = the name of the secret holding the webhook URL
+
 # (in .env when running locally, a repository secret on GitHub).
+# chinese_summary: true adds a Chinese translation under each English summary, in that chat only.
 outputs:
   slack:
-    enabled: true
-    webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
     chinese_summary: false
   wecom:
-    enabled: false
-    webhook_env: WECOM_URL_EXAMPLE_LAB
-    chinese_summary: false
-  email:
     enabled: true
-    to: ['qianhanyu722@gmail.com']                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
-    chinese_summary: false                # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    webhook_env: WeCom_URL
+    chinese_summary: true
+  email:
+    enabled: true           # sender account: SMTP_* secrets (see digest/notify/mail.py)
+    to: ['dongxinruidxr@163.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    chinese_summary: true
