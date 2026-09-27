@@ -38,11 +38,14 @@ ranking:
 # (in .env when running locally, a repository secret on GitHub).
 outputs:
   slack:
-    enabled: false
-    webhook_env: SLACK_WEBHOOK_URL
+    enabled: true
+    webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
+    chinese_summary: false
   wecom:
     enabled: false
-    webhook_env: WeCom_URL
+    webhook_env: WECOM_URL_EXAMPLE_LAB
+    chinese_summary: false
   email:
-    enabled: true            # sender account: SMTP_* secrets (see digest/notify/mail.py)
-    to: ['qianhanyu722@gmail.com']                    # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    enabled: true
+    to: ['qianhanyu722@gmail.com']                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
+    chinese_summary: false                # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
