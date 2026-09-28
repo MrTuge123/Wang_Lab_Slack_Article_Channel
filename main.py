@@ -52,11 +52,11 @@ def run_subscriber(sub, dry_run=False):
     chinese = notify.wants_chinese(sub)     # some chat has chinese_summary: true
     for p in top:                           # once, shared by every chat
         print("Summarizing:", p["title"][:80])
-        p["summary"] = summarizer.summarize(p, sub["model"])
+        p["summary"] = summarizer.summarize(p, sub["model"], sub)
         if chinese:                         # extra, not saved to history/
-            p["summary_zh"] = summarizer.to_chinese(p, sub["model"])
+            p["summary_zh"] = summarizer.to_chinese(p, sub["model"], sub)
     print("Writing the overview...")
-    overview = summarizer.overview(top, sub["model"])       # None for one paper, or if Kimi fails
+    overview = summarizer.overview(top, sub["model"], sub)       # None for one paper, or if Kimi fails
     context = {"candidates": len(papers), "found": report, "overview": overview,
                "overview_zh": summarizer.translate_zh(overview, sub["model"]) if overview and chinese else None}
 
