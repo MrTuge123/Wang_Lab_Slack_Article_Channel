@@ -79,5 +79,5 @@ outputs:
     chinese_summary: false
   email:
     enabled: true
-    to: ['qianhanyu722@gmail.com', 'qhanyu@umich.edu']                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
-    chinese_summary: false                # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB
+    to_env: EMAIL_TO_WANG_LAB   # secret with the addresses, comma-separated (.env locally, GitHub secret in Actions)
+    chinese_summary: false
