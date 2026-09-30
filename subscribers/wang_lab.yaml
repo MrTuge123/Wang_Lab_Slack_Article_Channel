@@ -4,17 +4,49 @@ name: "Wang Lab"
 # What to search for: EITHER a boolean query, translated into every source's syntax...
 #   words or "quoted phrases", AND / OR / NOT (upper case), parentheses. PubMed gets it as written.
 #   Preview each source's version:  python -m digest.query '<your query>'
-query: "graph neural network AND knowledge graph"
+query: >-
+  ("graph neural network"[tiab] OR "graph neural networks"[tiab] OR GNN[tiab] OR GNNs[tiab]
+  OR "graph convolutional network"[tiab] OR "graph convolutional networks"[tiab]
+  OR "graph attention network"[tiab] OR "graph attention networks"[tiab] OR "graph transformer"[tiab]
+  OR "graph autoencoder"[tiab] OR "graph representation learning"[tiab])
+  AND ("multi-omics"[tiab] OR "multi-omic"[tiab] OR multiomics[tiab] OR multiomic[tiab] OR omics[tiab]
+  OR transcriptomics[tiab] OR transcriptomic[tiab] OR proteomics[tiab] OR metabolomics[tiab]
+  OR genomics[tiab] OR epigenomics[tiab] OR "single-cell"[tiab] OR "single cell"[tiab] OR scRNA-seq[tiab]
+  OR "spatial transcriptomics"[tiab] OR "gene expression"[tiab] OR "gene regulatory"[tiab]
+  OR "protein-protein interaction"[tiab] OR "cancer subtype"[tiab] OR "cancer subtypes"[tiab])
+  NOT (molecule[ti] OR molecules[ti] OR "molecular property"[ti] OR "molecular properties"[ti]
+  OR "molecular generation"[ti] OR retrosynthesis[ti] OR catalyst[ti] OR catalysts[ti] OR catalysis[ti]
+  OR crystal[ti] OR crystals[ti] OR polymer[ti] OR polymers[ti] OR "potential energy"[ti] OR "force field"[ti]
+  OR "quantum chemistry"[ti] OR tautomer[ti] OR tautomers[ti] OR "retention time"[ti] OR toxicology[ti]
+  OR "natural products"[ti] OR "traditional Chinese medicine"[ti] OR traffic[ti] OR "power grid"[ti]
+  OR "social network"[ti] OR "social networks"[ti] OR recommender[ti] OR "fault diagnosis"[ti]
+  OR "intrusion detection"[ti] OR "point cloud"[ti] OR "remote sensing"[ti] OR EEG[ti] OR fMRI[ti]
+  OR radiomics[ti] OR food[ti])
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 
 # Where to search besides PubMed. To hand-tune one source, give it its own query:
 # in that source's syntax, e.g.  arxiv: {enabled: true, query: 'ti:"knowledge graph"'}
 sources:
-  europepmc:        {enabled: true}   # PubMed + bioRxiv/medRxiv preprints and more
-  openalex:         {enabled: true}   # journals, conferences, preprints in every field
-  semantic_scholar: {enabled: true}   # strong on CS/AI
-  arxiv:            {enabled: true}   # preprints
+  europepmc:
+    enabled: true
+    query: >-
+      TITLE_ABS:("graph neural network" OR "graph neural networks" OR GNN OR GNNs
+      OR "graph convolutional network" OR "graph convolutional networks" OR "graph attention network"
+      OR "graph attention networks" OR "graph transformer" OR "graph autoencoder" OR "graph representation learning")
+      AND TITLE_ABS:("multi-omics" OR "multi-omic" OR multiomics OR multiomic OR omics OR transcriptomics
+      OR transcriptomic OR proteomics OR metabolomics OR genomics OR epigenomics OR "single-cell" OR "single cell"
+      OR scRNA-seq OR "spatial transcriptomics" OR "gene expression" OR "gene regulatory"
+      OR "protein-protein interaction" OR "cancer subtype" OR "cancer subtypes")
+      NOT TITLE:(molecule OR molecules OR "molecular property" OR "molecular properties" OR "molecular generation"
+      OR retrosynthesis OR catalyst OR catalysts OR catalysis OR crystal OR crystals OR polymer OR polymers
+      OR "potential energy" OR "force field" OR "quantum chemistry" OR tautomer OR tautomers OR "retention time"
+      OR toxicology OR "natural products" OR "traditional Chinese medicine" OR traffic OR "power grid"
+      OR "social network" OR "social networks" OR recommender OR "fault diagnosis" OR "intrusion detection"
+      OR "point cloud" OR "remote sensing" OR EEG OR fMRI OR radiomics OR food)
+  openalex:         {enabled: false}
+  semantic_scholar: {enabled: true}
+  arxiv:            {enabled: true}
 
 # Optional: hard filter, only these journals (leave the list empty [] for all journals).
 # Preprints are dropped when this is set.
@@ -38,7 +70,7 @@ ranking:
 # (in .env when running locally, a repository secret on GitHub).
 outputs:
   slack:
-    enabled: true
+    enabled: false
     webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
     chinese_summary: false
   wecom:
@@ -47,5 +79,5 @@ outputs:
     chinese_summary: false
   email:
     enabled: true
-    to: ['qianhanyu722@gmail.com']                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
+    to: ['qianhanyu722@gmail.com', 'qhanyu@umich.edu']                    # addresses (Bcc'd), or to_env: EMAIL_TO_EXAMPLE_LAB (secret, comma-separated)
     chinese_summary: false                # e.g. ["a@umich.edu", "b@umich.edu"]; or to_env: EMAIL_TO_WANG_LAB

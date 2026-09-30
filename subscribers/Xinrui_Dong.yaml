@@ -4,7 +4,19 @@ name: "Xinrui Dong"
 # What to search for: EITHER a boolean query, translated into every source's syntax...
 #   words or "quoted phrases", AND / OR / NOT (upper case), parentheses. PubMed gets it as written.
 #   Preview each source's version:  python -m digest.query '<your query>'
-query: '(("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR glycolytic OR lactate)) NOT ("glucose sensor" OR "lactate sensor" OR biosensor OR "electrochemical sensor" OR electrode)'
+query: >-
+  ("triple-negative breast cancer"[tiab] OR "triple negative breast cancer"[tiab] OR TNBC[tiab])
+  AND (trial[tiab] OR trials[tiab] OR "Clinical Trial"[pt] OR "single-cell"[tiab] OR "single cell"[tiab]
+  OR scRNA-seq[tiab] OR snRNA-seq[tiab] OR "spatial transcriptomics"[tiab])
+  NOT (sensor[ti] OR sensors[ti] OR biosensor[ti] OR biosensors[ti] OR electrode[ti] OR electrodes[ti]
+  OR electrochemical[ti] OR nanoparticle[ti] OR nanoparticles[ti] OR nanoplatform[ti] OR nanoplatforms[ti]
+  OR nanomedicine[ti] OR nanozyme[ti] OR nanozymes[ti] OR nanorobot[ti] OR nanorobots[ti]
+  OR nanocarrier[ti] OR nanocarriers[ti] OR nanocomposite[ti] OR nanocomposites[ti] OR "nano-encapsulation"[ti]
+  OR hydrogel[ti] OR hydrogels[ti] OR "metal-organic framework"[ti] OR "metal-organic frameworks"[ti]
+  OR metalloplatform[ti] OR "3D-printed"[ti] OR "3D printing"[ti] OR liposome[ti] OR liposomes[ti]
+  OR micelle[ti] OR micelles[ti] OR microneedle[ti] OR microneedles[ti] OR scaffold[ti] OR scaffolds[ti]
+  OR implant[ti] OR implants[ti] OR photothermal[ti] OR photodynamic[ti] OR sonodynamic[ti] OR chemodynamic[ti])
+
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 
@@ -13,8 +25,8 @@ query: '(("triple-negative breast cancer" OR TNBC) AND (glucose OR glycolysis OR
 sources:
   europepmc:        {enabled: true}   # PubMed + bioRxiv/medRxiv preprints and more
   openalex:         {enabled: true}   # journals, conferences, preprints in every field
-  semantic_scholar: {enabled: true}   # strong on CS/AI
-  arxiv:            {enabled: true}   # preprints
+  semantic_scholar: {enabled: false}   # strong on CS/AI
+  arxiv:            {enabled: false}   # preprints
 
 # Optional: hard filter, only these journals (leave the list empty [] for all journals).
 # Preprints are dropped when this is set.
@@ -37,7 +49,7 @@ ranking:
   # Hard filters (0 = off). Preferred authors/journals always pass.
   min_score: 0          # min weighted score to pass filter (0-1)
   min_author_h_index: 5        # min h-index of the paper's top co-first/corresponding author
-  min_journal_citedness: 10     # min journal's 2-year mean citations (~ impact factor)
+  min_journal_citedness: 5     # min journal's 2-year mean citations (~ impact factor)
 # Where to post. webhook_env = the name of the secret holding the webhook URL
 
 # (in .env when running locally, a repository secret on GitHub).
