@@ -53,7 +53,7 @@ def run_subscriber(sub, dry_run=False):
         return []
 
     print(f"Summarizing {len(top)} papers and writing the overview...")       # once, shared by every chat
-    overview = summarizer.summarize_all(top, sub["model"], sub)   # None for one paper, or if Kimi fails
+    overview = summarizer.summarize_all(top, sub["model"], sub, pool=papers)   # None for one paper, or if Kimi fails
     overview_zh = None
     if notify.wants_chinese(sub):           # some chat has chinese_summary: true (not saved to history/)
         print("Translating into Chinese...")

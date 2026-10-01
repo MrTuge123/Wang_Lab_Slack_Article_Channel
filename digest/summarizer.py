@@ -15,8 +15,9 @@ SYSTEM = ("You are an expert in the given field writing summaries of new papers 
           "read by researchers. Use only what the titles and abstracts say; never add facts, numbers or claims.")
 ZH_SYSTEM = ("You translate short scientific summaries into Simplified Chinese for Chinese-speaking "
              "researchers. Be accurate and natural, and don't add or drop details.")
-OVERVIEW_SYSTEM = ("You write the opening lines of a literature digest read by researchers. "
-                   "Be accurate and concise; use only what the titles and summaries say.")
+OVERVIEW_SYSTEM = ("You are an expert in the given field writing the opening paragraph of a literature "
+                   "digest read by researchers: a picture of the recent literature in their area. "
+                   "Be accurate and concise; use only what the titles, abstracts and summaries say.")
 STYLE = ("Start directly with the content (not 'This paper', 'The authors' or 'These papers'). "
          "No hype words (novel, groundbreaking, cutting-edge), no markdown.")
 SUMMARY_RULES = (
@@ -27,13 +28,23 @@ SUMMARY_RULES = (
     + STYLE + " Spell out an abbreviation the first time unless it is standard in the field. "
     "If the abstract reports no results, say what they set out to do instead.")
 OVERVIEW_RULES = (
-    "3-5 sentences (at most 110 words in total) telling these readers what in this digest is most "
-    "worth their attention. Start with one sentence on the common thread, but only if several papers "
-    "really share a specific one (a method, target, disease or dataset). If they don't, skip it; don't "
-    "invent a theme. Then cover the two or three papers most relevant to the readers' interest: for each, "
-    "say what was done and what was found, using concrete terms (methods, molecules, systems, results), "
-    "and cite it by number, e.g. (#3). Avoid generic framings such as 'advances in', "
+    "one paragraph of 4-6 sentences (at most 160 words), plain text, about the research landscape, "
+    "not a list of papers:\n"
+    "1. The general focus: what the relevant papers found in this period are mostly about, as a whole. "
+    "Name the 2-3 main research directions they cluster into (a method family, disease or biological "
+    "system, data type) with rough counts where clear, e.g. 'about ten papers apply graph attention "
+    "networks to spatial transcriptomics'. Base this on ALL the relevant papers listed, not only the "
+    "selected ones.\n"
+    "2. A notable trend within it (a method or question that keeps coming up, or a shift in focus), "
+    "only if the list clearly shows one.\n"
+    "3. Why the selected papers were picked and which of those directions they represent, citing them "
+    "by number, e.g. (#2, #4). They ranked highest on fit to the readers' interest, author and journal "
+    "impact, and keyword matches. Don't describe their methods or results: the summary under each "
+    "paper does that.\n"
+    "Don't give numbers from individual papers. If the papers don't share a clear focus, say they are "
+    "spread out and name the areas; never invent a theme. Avoid generic framings such as 'advances in', "
     "'highlight the potential of', 'diverse applications'. " + STYLE)
+OVERVIEW_POOL_MAX = 60      # most other relevant titles shown to Kimi for the overview
 ZH_RULES = ("Keep gene, protein and drug names, abbreviations (e.g. TNBC, PD-1) and numbers exactly "
             "as written.")
 NO_ABSTRACT = "No abstract available."
@@ -72,11 +83,35 @@ def _text(v):
     return v.strip() if isinstance(v, str) and v.strip() else None
 
 
+def _landscape(papers, pool, sub):
+    """For the overview: how many candidates there were and the titles of the other relevant ones.
+    Relevant = Kimi relevance at or above overview_min_relevance (all candidates if unscored)."""
+    if not pool:
+        return ""
+    chosen = {id(p) for p in papers}
+    rest = [p for p in pool if id(p) not in chosen]
+    cutoff = (sub or {}).get("overview_min_relevance", 5)
+    scored = any(p.get("relevance") is not None for p in pool)
+    if scored:
+        rest = [p for p in rest if p.get("relevance") is not None and p["relevance"] >= cutoff]
+        which = f"judged relevant to the readers (relevance {cutoff}/10 or more)"
+    else:
+        which = "found"
+    shown = rest[:OVERVIEW_POOL_MAX]
+    head = (f"\n\nThe selected papers above are the top {len(papers)} of {len(pool)} candidates found "
+            f"in {period(sub) if sub and sub.get('days_back') else 'this period'}. "
+            f"{len(rest) + len(papers)} candidates were {which}; the other "
+            f"{len(rest)} are listed here by title (best ranked first"
+            + (f", first {len(shown)} shown" if len(shown) < len(rest) else "") + "):\n")
+    return head + "\n".join(f"- {p['title']}" for p in shown)
+
+
 # ---------- English: batched ----------
 
-def summarize_all(papers, model, sub=None):
+def summarize_all(papers, model, sub=None, pool=None):
     """Set p["summary"] on every paper and return the digest's overview: None for a single paper
     (its own summary says it all) or if Kimi fails (the digest then goes out without it).
+    pool: every ranked candidate (best first), so the overview can describe the wider literature.
     Normally one Kimi call; papers it misses are summarized one call each."""
     want_overview = len(papers) >= 2
     todo = []
@@ -91,18 +126,18 @@ def summarize_all(papers, model, sub=None):
     text = None
     if todo:
         try:
-            text = _summarize_batch(papers, todo, model, sub, want_overview)
+            text = _summarize_batch(papers, todo, model, sub, want_overview, pool)
         except (llm.RateLimited, OpenAIError, ValueError) as e:
             print(f"  Batched summaries failed ({e}); summarizing one paper at a time.")
     for p in todo:
         if p["summary"] is None:
             p["summary"] = summarize(p, model, sub)
     if want_overview and not text:
-        text = overview(papers, model, sub)
+        text = overview(papers, model, sub, pool)
     return text
 
 
-def _summarize_batch(papers, todo, model, sub, want_overview):
+def _summarize_batch(papers, todo, model, sub, want_overview, pool=None):
     """One call for the summaries of `todo` (and the overview of all `papers`). Returns the overview."""
     items = []
     for i, p in enumerate(papers, 1):
@@ -114,14 +149,15 @@ def _summarize_batch(papers, todo, model, sub, want_overview):
             items.append(f"[{i}] Title: {p['title']}\n(no abstract)")
     nums = [str(papers.index(p) + 1) for p in todo]
     task = (f"For each of papers {', '.join(nums)}, write a summary: {SUMMARY_RULES}\n\n")
-    shape = '{"summaries": {"' + nums[0] + '": "..."}'
+    shape = '{"summaries": {"' + nums[0] + '": "..."}}'
     if want_overview:
-        task += f"Also write the overview that opens the digest, about all the papers above: {OVERVIEW_RULES}\n\n"
-        shape += ', "overview": "..."'
+        task += f"Also write the overview that opens the digest: {OVERVIEW_RULES}\n\n"
+        shape = shape[:-1] + ', "overview": "..."}'
     reply = llm.ask_json(
         SYSTEM,
-        _readers(sub) + "Papers:\n\n" + "\n\n".join(items) + "\n\n" + task
-        + f"Reply with JSON only: {shape}}}, with one summary per paper number listed above.",
+        _readers(sub) + "Selected papers:\n\n" + "\n\n".join(items)
+        + (_landscape(papers, pool, sub) if want_overview else "") + "\n\n" + task
+        + "Reply with JSON only: " + shape + ", with one summary per paper number listed above.",
         model)
     summaries = reply.get("summaries") if isinstance(reply.get("summaries"), dict) else {}
     for n, p in zip(nums, todo):
@@ -154,9 +190,9 @@ def summarize(paper, model, sub=None):
     return _cache[key]
 
 
-def overview(papers, model, sub=None):
-    """The digest's overview from the papers' titles and summaries; None for a single paper or if
-    Kimi fails."""
+def overview(papers, model, sub=None, pool=None):
+    """The digest's overview from the papers' titles and summaries (and the other relevant
+    candidates' titles in pool); None for a single paper or if Kimi fails."""
     if len(papers) < 2:
         return None
     items = [f"{i}. {p['title']}" + (f"\n   {p['summary']}" if _usable(p.get("summary")) else "")
@@ -164,8 +200,8 @@ def overview(papers, model, sub=None):
     try:
         return llm.ask(
             OVERVIEW_SYSTEM,
-            _readers(sub) + "The papers in this digest:\n\n" + "\n\n".join(items) + "\n\n"
-            f"Write {OVERVIEW_RULES} Reply with the sentences only.",
+            _readers(sub) + "Selected papers:\n\n" + "\n\n".join(items) + _landscape(papers, pool, sub)
+            + f"\n\nWrite {OVERVIEW_RULES} Reply with the paragraph only.",
             model)
     except (llm.RateLimited, OpenAIError) as e:
         print(f"  Overview skipped ({e})")

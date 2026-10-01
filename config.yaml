@@ -19,6 +19,7 @@ sources:
   semantic_scholar: {enabled: false}
   arxiv:            {enabled: false}
 max_papers: 5             # s: papers posted per subscriber
+overview_min_relevance: 5 # the overview describes all candidates with at least this relevance (0-10)
 
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
 ranking:
