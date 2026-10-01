@@ -2,7 +2,8 @@
 # 1. Copy to subscribers/<name>.yaml (letters, digits, - and _ only). <name> is the subscriber's ID:
 #    its "already sent" list is seen/<name>.json, and  python main.py --subscriber <name>  runs just it.
 # 2. Add each webhook URL as a secret under the name in webhook_env:
-#    locally in .env, and on GitHub under Settings > Secrets and variables > Actions.
+#    locally in .env, and on GitHub under Settings > Secrets and variables > Actions;
+#    a new secret name also needs one line in the Run digest step of .github/workflows/digest.yml.
 # Any setting from config.yaml (days_back, max_papers, model, ranking: ...) can be overridden here.
 name: "Example Lab"
 

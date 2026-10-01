@@ -38,9 +38,19 @@ jobs:
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}   # optional
-          # Webhook URLs: each subscriber's webhook_env is looked up among the repository
-          # secrets, so adding a subscriber only needs a new secret, not an edit here.
-          GITHUB_SECRETS_JSON: ${{ toJSON(secrets) }}
+          # Email sender account
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}                  # optional
+          # Webhook URLs / recipient lists named by webhook_env / to_env in subscribers/*.yaml.
+          # A new subscriber with a new secret name needs a line here too. (Passing all secrets
+          # at once gets the workflow flagged by GitHub as possibly malicious.)
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          WeCom_URL: ${{ secrets.WECOM_URL }}
+          SLACK_WEBHOOK_EXAMPLE_LAB: ${{ secrets.SLACK_WEBHOOK_EXAMPLE_LAB }}
+          WECOM_URL_EXAMPLE_LAB: ${{ secrets.WECOM_URL_EXAMPLE_LAB }}
           SUBSCRIBER: ${{ inputs.subscriber }}
         run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 

@@ -23,7 +23,7 @@ Each subscriber (a lab or channel) is one file in `subscribers/`, with its own q
 
 **Add a subscriber**
 1. Copy `subscribers/_template.yaml` to `subscribers/<name>.yaml` and fill in `query`, `ranking.key_words` and `outputs`.
-2. For each chat switched on, add its webhook URL as a secret named as in `webhook_env`: in `.env` for local runs, and on GitHub under Settings → Secrets and variables → Actions. The workflow doesn't need editing.
+2. For each chat switched on, add its webhook URL as a secret named as in `webhook_env`: in `.env` for local runs, and on GitHub under Settings → Secrets and variables → Actions. Also add the secret's name to the `env:` list of the Run digest step in `.github/workflows/digest.yml` (secrets are passed one by one).
 3. Check it: `python main.py --subscriber <name> --dry-run`, then commit and push.
 
 **Remove one:** delete its YAML file (or rename it to start with `_` to pause it).
