@@ -12,5 +12,6 @@
      wecom:
        enabled: false
      email:
-      enabled: true
-      to: ["qianhanyu722@gmail.com"]
+        enabled: true
+        to: ["tigercui@umich.edu"]
+        chinese_summary: false

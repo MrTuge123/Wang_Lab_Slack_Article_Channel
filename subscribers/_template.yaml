@@ -12,6 +12,9 @@ name: "Example Lab"
 query: '"single cell" AND ("spatial transcriptomics" OR "spatial omics")'
 # OR a plain-English topic instead of query: (Kimi writes the boolean query on each run):
 # topic: "single-cell and spatial transcriptomics methods"
+# Optional: what the readers care about, in plain English. Kimi uses it to judge each paper's
+# relevance and to tailor the summaries (default: the topic: or query: above, plus key_words).
+# interest: "new computational methods for single-cell and spatial transcriptomics"
 
 # Extra sources besides PubMed (delete the ones you don't want). Add query: to one to override
 # the translated query in that source's own syntax.
@@ -28,7 +31,8 @@ journals: []                  # only these journals (preprints are dropped when 
 ranking:
   preferred_authors: []       # OpenAlex IDs (python -m digest.openalex "Author Name") or exact names
   preferred_journals: []
-  key_words: []
+  key_words: []              # + keyword_credit each, found in title, abstract or author keywords
+  # min_relevance: 4          # drop papers Kimi scores below 4/10 for relevance
   # min_author_h_index: 10
 
 # chinese_summary: true adds a Chinese translation under each English summary, in that chat only

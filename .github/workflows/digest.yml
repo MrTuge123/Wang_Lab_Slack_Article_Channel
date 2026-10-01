@@ -3,7 +3,7 @@ name: Paper digest
 on:
   schedule:
     - cron: "0 7 * * 1"
-      timezone: "America/New_York"  # Fridays 16:00 UTC (12pm Ann Arbor in summer, 11am in winter)
+      timezone: "America/New_York"  # Mondays 7am Ann Arbor time (GitHub handles daylight saving)
   workflow_dispatch:        # adds a "Run workflow" button on GitHub
     inputs:
       subscriber:
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   digest:
     runs-on: ubuntu-latest
-    timeout-minutes: 45     # Kimi allows ~3 summaries/min, so each subscriber adds a few minutes
+    timeout-minutes: 45     # Kimi allows ~3 calls/min; each subscriber needs a few (relevance, summaries, Chinese)
     steps:
       - uses: actions/checkout@v4
 

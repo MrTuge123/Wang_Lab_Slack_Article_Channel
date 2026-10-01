@@ -5,8 +5,14 @@ ZH_LABEL = "中文概要："                  # before the Chinese summary (摘�
 
 
 def digest_title(sub):
-    """'Wang Lab · weekly paper digest': the first line of every chat's digest."""
-    return f"{sub['name']} · weekly paper digest"
+    """'Wang Lab · paper digest': the first line of every chat's digest."""
+    return f"{sub['name']} · paper digest"
+
+
+def period(sub):
+    """'the last 30 days': how far back the search went (days_back)."""
+    n = sub["days_back"]
+    return "the last day" if n == 1 else f"the last {n} days"
 
 
 def date_range(sub):
@@ -27,12 +33,14 @@ def stats_line(top, context=None):
 
 
 def impact_line(p):
-    """'Journal · top author: Name (first, h=40) · keywords: GNN · score 0.72'"""
+    """'Journal · top author: Name (first, h=40) · keywords: GNN · relevance 8/10 · score 0.72'"""
     bits = [p["journal"]]
     if p.get("top_author"):
         a = p["top_author"]
         bits.append(f"top author: {a['name']} ({a['role']}, h={a['h']})")
     if p["keyword_hits"]:
         bits.append("keywords: " + ", ".join(p["keyword_hits"]))
+    if p.get("relevance") is not None:
+        bits.append(f"relevance {p['relevance']}/10")
     bits.append(f"score {p['score']:.2f}")
     return " · ".join(bits)

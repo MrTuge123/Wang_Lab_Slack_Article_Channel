@@ -1,6 +1,6 @@
 """For each subscriber: search PubMed, Europe PMC, OpenAlex, Semantic Scholar and arXiv for new
 papers, merge duplicates, rank them by author/journal impact (OpenAlex),
-summarize the top ones with Kimi, and post to that subscriber's Slack / WeCom.
+score their relevance to the subscriber's interest (Kimi), summarize the top ones with Kimi, and post to that subscriber's Slack / WeCom.
 The steps live in digest/ (see digest/__init__.py for the map).
 
 Subscribers:   one file each in subscribers/ (copy subscribers/_template.yaml)
@@ -18,7 +18,7 @@ import traceback
 
 import requests
 
-from digest import notify, openalex, paper, ranking, sources, summarizer
+from digest import notify, openalex, paper, ranking, relevance, sources, summarizer
 from digest.config import load_subscribers
 from digest.history import save_history
 from digest.store import load_seen, run_lock, save_seen
@@ -39,6 +39,9 @@ def run_subscriber(sub, dry_run=False):
         openalex.enrich(papers)
     except requests.RequestException as e:
         print(f"Warning: OpenAlex lookup failed ({e}); ranking without it.")
+    if relevance.wanted(sub["ranking"]):
+        print("Scoring relevance with Kimi...")
+        relevance.score_all(papers, sub)
 
     papers = ranking.rank_papers(papers, sub["ranking"])
     ranking.print_ranking(papers)
@@ -49,16 +52,13 @@ def run_subscriber(sub, dry_run=False):
             save_history(sub["id"], papers, posted=[])
         return []
 
-    chinese = notify.wants_chinese(sub)     # some chat has chinese_summary: true
-    for p in top:                           # once, shared by every chat
-        print("Summarizing:", p["title"][:80])
-        p["summary"] = summarizer.summarize(p, sub["model"], sub)
-        if chinese:                         # extra, not saved to history/
-            p["summary_zh"] = summarizer.to_chinese(p, sub["model"], sub)
-    print("Writing the overview...")
-    overview = summarizer.overview(top, sub["model"], sub)       # None for one paper, or if Kimi fails
-    context = {"candidates": len(papers), "found": report, "overview": overview,
-               "overview_zh": summarizer.translate_zh(overview, sub["model"]) if overview and chinese else None}
+    print(f"Summarizing {len(top)} papers and writing the overview...")       # once, shared by every chat
+    overview = summarizer.summarize_all(top, sub["model"], sub)   # None for one paper, or if Kimi fails
+    overview_zh = None
+    if notify.wants_chinese(sub):           # some chat has chinese_summary: true (not saved to history/)
+        print("Translating into Chinese...")
+        overview_zh = summarizer.translate_all(top, overview, sub["model"], sub)
+    context = {"candidates": len(papers), "found": report, "overview": overview, "overview_zh": overview_zh}
 
     posted, failed = notify.post(top, sub, dry_run, context)
     if posted:                              # at least one chat has them, so don't post them again

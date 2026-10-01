@@ -4,3 +4,4 @@ __pycache__/
 .digest.lock
 .seen-*.tmp
 .history-*.tmp
+.yaml

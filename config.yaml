@@ -22,16 +22,23 @@ max_papers: 5             # s: papers posted per subscriber
 
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
 ranking:
-  # Final score = weighted mix of author score and journal score (0-1),
+  # Final score = weighted mix of relevance, author score and journal score (0-1),
   # plus keyword_credit for each matched keyword (key_words are set per subscriber)
+  relevance_weight: 1.0        # 0 = off (no Kimi relevance calls)
   author_weight: 0.6
   journal_weight: 0.4
+
+  # Relevance: Kimi reads every candidate's title + abstract and scores 0-10 how well it fits the
+  # subscriber's interest: (default: its topic:/query: plus key_words), relevance_batch papers per call.
+  # A paper Kimi couldn't score is ranked on author + journal alone.
+  relevance_batch: 25
 
   # Caps: at or above these values a paper gets the full score for that part
   author_h_cap: 60             # h-index of the paper's top co-first/corresponding author
   journal_citedness_cap: 10    # journal's 2-year mean citations (~ impact factor)
 
   # Hard filters (0 = off). Preferred authors/journals always pass.
+  min_relevance: 0             # min Kimi relevance (0-10); e.g. 4 drops papers that are off topic
   min_score: 0.0               # min weighted score to pass filter (0-1)
   min_author_h_index: 0        # min h-index of the paper's top co-first/corresponding author
   min_journal_citedness: 0     # min journal's 2-year mean citations (~ impact factor)

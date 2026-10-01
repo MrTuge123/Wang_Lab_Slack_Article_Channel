@@ -13,10 +13,10 @@ def _words(s):
 
 
 def keyword_hits(p, rank):
-    """The subscriber's key_words found in the paper's author keywords, each counted once.
-    Whole words only: 'diabetes' matches 'Type 2 Diabetes' but not 'diabetic'."""
-    kws = [_words(k) for k in p["keywords"]]
-    return [t for t in rank.get("key_words") or [] if any(_words(t) in k for k in kws)]
+    """The subscriber's key_words found in the paper's author keywords, title or abstract, each
+    counted once. Whole words only: 'diabetes' matches 'Type 2 Diabetes' but not 'diabetic'."""
+    texts = [_words(k) for k in p["keywords"]] + [_words(p["title"]), _words(p.get("abstract") or "")]
+    return [t for t in rank.get("key_words") or [] if any(_words(t) in x for x in texts)]
 
 
 def is_preferred_author(p, rank):
@@ -42,7 +42,14 @@ def journal_citedness(p):
     return p["source"]["citedness"] if p.get("source") else 0
 
 
+def relevance(p):
+    """Kimi's 0-10 relevance as 0-1, or None if the paper wasn't scored (see digest/relevance.py)."""
+    return None if p.get("relevance") is None else p["relevance"] / 10
+
+
 def score(p, rank):
+    """Weighted mix of relevance, author and journal scores (0-1), plus keyword credit.
+    A paper without a relevance score is scored on author and journal alone."""
     wa, wj = rank.get("author_weight", 0.6), rank.get("journal_weight", 0.4)
     if p.get("oa_matched"):
         a = min(author_h(p) / rank.get("author_h_cap", 60), 1)
@@ -55,13 +62,20 @@ def score(p, rank):
         a = 1.0
     if is_preferred_journal(p, rank):
         j = 1.0
+    parts = [(wa, a), (wj, j)]
+    if relevance(p) is not None:
+        parts.append((rank.get("relevance_weight", 1.0), relevance(p)))
+    total = sum(w for w, _ in parts)
+    mix = sum(w * v for w, v in parts) / total if total else 0
     credit = rank.get("keyword_credit", 0.1) * len(p["keyword_hits"])
-    return round((wa * a + wj * j) / (wa + wj) + credit, 3)
+    return round(mix + credit, 3)
 
 
 def passes_filters(p, rank):
     if is_preferred_author(p, rank) or is_preferred_journal(p, rank):
         return True
+    if p.get("relevance") is not None and p["relevance"] < rank.get("min_relevance", 0):
+        return False
     if p["score"] < rank.get("min_score", 0):
         return False
     if p.get("preprint") and not rank.get("keep_preprints", True):
@@ -86,13 +100,15 @@ SOURCE_ABBR = {"PubMed": "PM", "Europe PMC": "EP", "OpenAlex": "OA", "Semantic S
 
 
 def print_ranking(papers):
-    print(f"\n{'score':>5}  {'h':>4}  {'role':<22}  {'jrnl':>5}  {'kw':>2}  pass  {'found in':<14}  title")
+    print(f"\n{'score':>5}  {'rel':>3}  {'h':>4}  {'role':<22}  {'jrnl':>5}  {'kw':>2}  pass  {'found in':<14}  title")
     for p in papers:
         flag = "yes" if p["passed"] else "no"
         tag = ("" if p.get("oa_matched") else " [not in OpenAlex]") + (" [preprint]" if p.get("preprint") else "")
         role = (p.get("top_author") or {}).get("role", "")
         found = ",".join(SOURCE_ABBR.get(s, s) for s in p["sources"])
         jrnl = "-" if p.get("preprint") else journal_citedness(p)
-        print(f"{p['score']:>5.2f}  {author_h(p):>4}  {role:<22}  {jrnl:>5}  "
+        rel = "-" if p.get("relevance") is None else p["relevance"]
+        print(f"{p['score']:>5.2f}  {rel:>3}  {author_h(p):>4}  {role:<22}  {jrnl:>5}  "
               f"{len(p['keyword_hits']):>2}  {flag:<4}  {found:<14}  {p['title'][:60]}{tag}")
+    print("(rel: Kimi's 0-10 relevance to the subscriber's interest, - = not scored)")
     print("(found in: PM PubMed, EP Europe PMC, OA OpenAlex, S2 Semantic Scholar, AX arXiv)\n")

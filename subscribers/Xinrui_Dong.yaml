@@ -40,7 +40,7 @@ ranking:
   preferred_authors: ["Shengcai Lin"]
   preferred_journals: []
 
-  # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords. Case and -/space
   # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
   # "diabetic"; "multi-omics" doesn't match "multiomics".
   key_words: ["Triple-negative breast cancer", "TNBC", "Glucose metabolism", "Metabolic heterogeneity",

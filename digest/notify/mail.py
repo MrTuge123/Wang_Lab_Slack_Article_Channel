@@ -30,6 +30,9 @@ def destination(cfg):
     """(recipients, None) or (None, what's missing)."""
     to = cfg.get("to") or []
     to = [to] if isinstance(to, str) else list(to)
+    if cfg.get("to_env") and (not isinstance(cfg["to_env"], str) or "@" in cfg["to_env"]):
+        return None, ("to_env must be the NAME of a secret (e.g. EMAIL_TO_WANG_LAB); "
+                      "put addresses under to: instead")
     if cfg.get("to_env"):
         to += [a.strip() for a in (env.get(cfg["to_env"]) or "").split(",") if a.strip()]
     missing = [n for n in ("SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD") if not env.get(n)]
@@ -141,13 +144,13 @@ def build(top, sub, context=None):
          style="max-width:640px;background:#ffffff;border-radius:10px;font-family:{FONT}">
     <tr><td style="padding:26px 28px 20px">
       <div style="color:{ACCENT};font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase">
-        Weekly paper digest</div>
+        Paper digest</div>
       <div style="color:{INK};font-size:24px;font-weight:700;line-height:30px;margin-top:6px">{e(sub["name"])}</div>
       <div style="color:{MUTED};font-size:14px;margin-top:4px">{e(date_range(sub))} · {e(stats)}</div>
     </td></tr>{overview_html}
     {"".join(_paper_html(i, p) for i, p in enumerate(top, 1))}
     <tr><td style="padding:18px 28px 24px;border-top:1px solid {LINE};color:{FAINT};font-size:12px;line-height:18px">
-      Searched {e(", ".join(searched))}. Ranked by author h-index, journal impact and keyword matches;
+      Searched {e(", ".join(searched))}. Ranked by relevance (judged by an AI model), author h-index, journal impact and keyword matches;
       summaries are written by an AI model and may contain mistakes.<br>
       Sent automatically by the {e(sub["name"])} paper digest. Reply to this email to stop receiving it.
     </td></tr>

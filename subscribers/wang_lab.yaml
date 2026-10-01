@@ -60,7 +60,7 @@ ranking:
   preferred_authors: []
   preferred_journals: []
 
-  # + keyword_credit for each of these found in the paper's author keywords. Case and -/space
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords. Case and -/space
   # are ignored, and whole words must match: "diabetes" matches "Type 2 Diabetes" but not
   # "diabetic"; "multi-omics" doesn't match "multiomics".
   key_words: ["multi-omics", "machine learning", "knowledge graph", "graph neural network",
@@ -70,8 +70,8 @@ ranking:
 # (in .env when running locally, a repository secret on GitHub).
 outputs:
   slack:
-    enabled: false
-    webhook_env: SLACK_WEBHOOK_EXAMPLE_LAB
+    enabled: true
+    webhook_env: SLACK_WEBHOOK_URL
     chinese_summary: false
   wecom:
     enabled: false
@@ -79,5 +79,6 @@ outputs:
     chinese_summary: false
   email:
     enabled: true
-    to_env: EMAIL_TO_WANG_LAB   # secret with the addresses, comma-separated (.env locally, GitHub secret in Actions)
+    to_env: ['tigercui@umich.edu']
+    #EMAIL_TO_WANG_LAB   # secret with the addresses, comma-separated (.env locally, GitHub secret in Actions)
     chinese_summary: false
