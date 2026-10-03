@@ -86,6 +86,6 @@ outputs:
     chinese_summary: false
   email:
     enabled: true
-    to_env: ['tigercui@umich.edu']
+    to_env: [EMAIL_TO_WANG_LAB]
     #EMAIL_TO_WANG_LAB   # secret with the addresses, comma-separated (.env locally, GitHub secret in Actions)
     chinese_summary: false
