@@ -17,6 +17,12 @@ query: >-
   OR micelle[ti] OR micelles[ti] OR microneedle[ti] OR microneedles[ti] OR scaffold[ti] OR scaffolds[ti]
   OR implant[ti] OR implants[ti] OR photothermal[ti] OR photodynamic[ti] OR sonodynamic[ti] OR chemodynamic[ti])
 
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it (without it, Kimi gets the whole query above).
+interest: >-
+  Triple-negative breast cancer (TNBC): clinical trials and single-cell studies,
+  with special interest in tumor glucose, glycolysis and lactate metabolism
+
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 

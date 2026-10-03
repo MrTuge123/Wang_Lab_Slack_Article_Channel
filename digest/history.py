@@ -31,6 +31,7 @@ def record(p, rank, today, posted):
         "title": p["title"],
         "score": p["score"],
         "relevance": p.get("relevance"),               # Kimi's 0-10 fit to the interest; None = not scored
+        "relevance_for": p.get("relevance_for"),       # how it was judged (relevance.stamp); reused if unchanged
         "rank": rank,                                   # 1 = best candidate of that run
         "posted_at": today if posted else None,         # None = never posted
         "first_seen": today,

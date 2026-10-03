@@ -22,6 +22,13 @@ query: >-
   OR "social network"[ti] OR "social networks"[ti] OR recommender[ti] OR "fault diagnosis"[ti]
   OR "intrusion detection"[ti] OR "point cloud"[ti] OR "remote sensing"[ti] OR EEG[ti] OR fMRI[ti]
   OR radiomics[ti] OR food[ti])
+
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it (without it, Kimi gets the whole query above).
+interest: >-
+  Graph neural networks for multi-omics, single-cell and spatial omics data in bioinformatics
+  (not chemistry or molecular property prediction)
+
 # ...OR a plain-English topic (delete query: above); Kimi writes the boolean query on each run:
 # topic: "graph neural networks applied to biomedical knowledge graphs"
 

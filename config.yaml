@@ -31,8 +31,10 @@ ranking:
 
   # Relevance: Kimi reads every candidate's title + abstract and scores 0-10 how well it fits the
   # subscriber's interest: (default: its topic:/query: plus key_words), relevance_batch papers per call.
-  # A paper Kimi couldn't score is ranked on author + journal alone.
+  # A paper Kimi couldn't score is ranked on author + journal alone. Scores are saved in history/
+  # and reused in later runs while the interest, model and relevance_thinking stay the same.
   relevance_batch: 25
+  relevance_thinking: false    # true = Kimi reasons before scoring: ~25x slower, scores vary more
 
   # Caps: at or above these values a paper gets the full score for that part
   author_h_cap: 60             # h-index of the paper's top co-first/corresponding author

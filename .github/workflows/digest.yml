@@ -51,6 +51,8 @@ jobs:
           WeCom_URL: ${{ secrets.WECOM_URL }}
           SLACK_WEBHOOK_EXAMPLE_LAB: ${{ secrets.SLACK_WEBHOOK_EXAMPLE_LAB }}
           WECOM_URL_EXAMPLE_LAB: ${{ secrets.WECOM_URL_EXAMPLE_LAB }}
+          EMAIL_TO_WANG_LAB: ${{ secrets.EMAIL_TO_WANG_LAB }}
+          EMAIL_TO_XINRUI_DONG: ${{ secrets.EMAIL_TO_XINRUI_DONG }}
           SUBSCRIBER: ${{ inputs.subscriber }}
         run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 
