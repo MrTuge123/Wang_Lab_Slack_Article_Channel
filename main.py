@@ -18,7 +18,7 @@ import traceback
 
 import requests
 
-from digest import notify, openalex, paper, ranking, relevance, sources, summarizer
+from digest import llm, notify, openalex, paper, ranking, relevance, sources, summarizer
 from digest.config import load_subscribers
 from digest.history import save_history
 from digest.store import load_seen, run_lock, save_seen
@@ -40,7 +40,7 @@ def run_subscriber(sub, dry_run=False):
     except requests.RequestException as e:
         print(f"Warning: OpenAlex lookup failed ({e}); ranking without it.")
     if relevance.wanted(sub["ranking"]):
-        print("Scoring relevance with Kimi...")
+        print(f"Scoring relevance with {llm.name()}...")
         relevance.score_all(papers, sub)
 
     papers = ranking.rank_papers(papers, sub["ranking"])

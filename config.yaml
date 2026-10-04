@@ -2,7 +2,9 @@
 # Each subscriber has its own file in subscribers/ (query, filters, where to post).
 # Anything set there overrides the value here; ranking: is merged key by key.
 
-model: "kimi-k2.6"
+provider: groq            # "groq" (GROQ_API_KEY) or "kimi" (MOONSHOT_API_KEY); see digest/llm.py
+model: "openai/gpt-oss-120b"   # Groq: openai/gpt-oss-120b, openai/gpt-oss-20b, llama-3.3-70b-versatile
+                         # Kimi: kimi-k2.6
 pubmed_sort: relevance    # "relevance" (PubMed Best Match) or "pub_date"
 days_back: 30             # n: papers from the last n days (added to PubMed / published / submitted)
 candidate_pool: 50        # k: papers pulled from each source before ranking (per-source override:
