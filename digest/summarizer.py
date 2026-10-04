@@ -166,7 +166,7 @@ def _summarize_batch(papers, todo, model, sub, want_overview, pool=None):
             p["summary"] = _cache[_key(p, model, sub)] = s
     missed = sum(p["summary"] is None for p in todo)
     if missed:
-        print(f"  Kimi's reply left out {missed} summar{'y' if missed == 1 else 'ies'}; writing them one by one.")
+        print(f"  {llm.name()}'s reply left out {missed} summar{'y' if missed == 1 else 'ies'}; writing them one by one.")
     return _text(reply.get("overview")) if want_overview else None
 
 

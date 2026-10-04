@@ -8,7 +8,7 @@ digest/config.py        loads config.yaml + subscribers/*.yaml
 digest/paper.py         one paper record: IDs, link, merging duplicates
 digest/sources/         pubmed, europepmc, openalex, semantic_scholar, arxiv  (python -m digest.sources <subscriber>)
 digest/query.py         one query -> each source's syntax  (python -m digest.query '<query>' or --topic "...")
-digest/llm.py           Kimi client with rate-limit retries
+digest/llm.py           LLM client (Kimi or Groq, config.yaml provider:) with rate-limit retries
 digest/openalex.py      author h-index, journal citedness  (python -m digest.openalex "Author Name")
 digest/relevance.py     Kimi scores each candidate's fit to the subscriber's interest (0-10, batched)
 digest/ranking.py       score, filter, sort
@@ -68,7 +68,7 @@ Add `chinese_summary: true` under any chat in a subscriber's `outputs:` to add a
 
 For each subscriber in turn (one failing doesn't stop the others):
 
-1. **Load settings:** `config.yaml` defaults + `subscribers/<name>.yaml`, and `.env` (webhook URLs, Kimi, NCBI, OpenAlex and optional Semantic Scholar keys).
+1. **Load settings:** `config.yaml` defaults + `subscribers/<name>.yaml`, and `.env` (webhook URLs, Kimi or Groq (`GROQ_API_KEY`), NCBI, OpenAlex and optional Semantic Scholar keys).
 2. **Search every source switched on, in parallel:** each with the query translated into its syntax (see Search queries), up to k = 50 papers each from the last n = 30 days. If a source fails, the others still run.
    - **PubMed:** papers added in the window, sorted by Best Match; the `journals:` whitelist is applied in the query.
    - **Europe PMC:** PubMed plus bioRxiv/medRxiv preprints and more (by first publication date).

@@ -34,7 +34,8 @@ jobs:
 
       - name: Run digest
         env:
-          MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}
+          MOONSHOT_API_KEY: ${{ secrets.MOONSHOT_API_KEY }}   # provider: kimi
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}           # provider: groq
           NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}   # optional
