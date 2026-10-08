@@ -1,0 +1,118 @@
+# Fan Shijie. Any setting from config.yaml can be overridden here.
+name: "Fan Shijie"
+
+# What to search for, in PubMed syntax ([tiab] = title/abstract). Four branches, any of which counts:
+#   small GTPases and their regulators            AND drug-discovery terms
+#   molecular glues, cyclic peptides, undruggable AND drug-discovery terms
+#   protein-protein interactions                  AND small molecules, peptides or stabilization
+#   AI methods                                    AND molecular / drug / binder / peptide design
+# minus network-pharmacology and hub-gene papers. Preview:  python -m digest.query '<query>'
+query: >-
+  ((("small GTPase"[tiab] OR "small GTPases"[tiab] OR "Ras superfamily"[tiab] OR KRAS[tiab] OR
+  "K-Ras"[tiab] OR NRAS[tiab] OR HRAS[tiab] OR "Rho GTPase"[tiab] OR "Rho GTPases"[tiab] OR RhoA[tiab]
+  OR Rac1[tiab] OR Cdc42[tiab] OR "Rab GTPase"[tiab] OR "Rab GTPases"[tiab] OR "Arf GTPase"[tiab] OR
+  Rheb[tiab] OR SOS1[tiab] OR "guanine nucleotide exchange factor"[tiab] OR "GTPase-activating
+  protein"[tiab]) AND ("drug discovery"[tiab] OR "drug design"[tiab] OR "structure-based"[tiab] OR
+  "small molecule"[tiab] OR "small molecules"[tiab] OR "small-molecule"[tiab] OR inhibitor[tiab] OR
+  inhibitors[tiab] OR "virtual screening"[tiab] OR docking[tiab] OR "molecular dynamics"[tiab] OR
+  binder[tiab] OR binders[tiab] OR degrader[tiab] OR degraders[tiab] OR stabilizer[tiab] OR
+  stabilizers[tiab])) OR (("molecular glue"[tiab] OR "molecular glues"[tiab] OR "cyclic peptide"[tiab]
+  OR "cyclic peptides"[tiab] OR "macrocyclic peptide"[tiab] OR "macrocyclic peptides"[tiab] OR
+  undruggable[tiab]) AND ("drug discovery"[tiab] OR "drug design"[tiab] OR "structure-based"[tiab] OR
+  "small molecule"[tiab] OR "small molecules"[tiab] OR "small-molecule"[tiab] OR inhibitor[tiab] OR
+  inhibitors[tiab] OR "virtual screening"[tiab] OR docking[tiab] OR "molecular dynamics"[tiab] OR
+  binder[tiab] OR binders[tiab] OR degrader[tiab] OR degraders[tiab] OR stabilizer[tiab] OR
+  stabilizers[tiab])) OR (("protein-protein interaction"[tiab] OR "protein-protein interactions"[tiab]
+  OR "protein-protein interface"[tiab]) AND ("drug discovery"[tiab] OR "drug design"[tiab] OR
+  "structure-based"[tiab] OR "small molecule"[tiab] OR "small molecules"[tiab] OR "small-molecule"[tiab]
+  OR stabilizer[tiab] OR stabilizers[tiab] OR stabilization[tiab] OR peptide[tiab] OR peptides[tiab]))
+  OR ((generative[tiab] OR "deep learning"[tiab] OR "machine learning"[tiab] OR "diffusion model"[tiab]
+  OR "language model"[tiab]) AND ("molecular design"[tiab] OR "de novo design"[tiab] OR "drug
+  design"[tiab] OR "binder design"[tiab] OR "peptide design"[tiab] OR "molecule generation"[tiab]))) NOT
+  ("network pharmacology"[tiab] OR "network toxicology"[tiab] OR decoction[tiab] OR "traditional Chinese
+  medicine"[tiab] OR "hub gene"[tiab] OR "hub genes"[tiab] OR "Mendelian randomization"[tiab] OR
+  herbal[tiab])
+
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it.
+interest: >-
+  My research focuses on structure-based drug discovery and the development of novel therapeutic
+  modalities targeting challenging protein targets, particularly small GTPases and their regulatory
+  proteins. I integrate computational approaches, including molecular docking, molecular dynamics
+  simulations, and AI-driven molecular design, with biochemical and biophysical assays to discover and
+  optimize small molecules and cyclic peptides. I am particularly interested in modulating
+  protein–protein interactions, stabilizing functional protein complexes, and developing novel
+  strategies for targeting previously undruggable proteins.
+
+# Where to search besides PubMed. Europe PMC gets its own copy of the query restricted to title +
+# abstract (otherwise it would also match full text); it adds bioRxiv and other preprints.
+sources:
+  europepmc:
+    enabled: true
+    query: >-
+      (((TITLE_ABS:"small GTPase" OR TITLE_ABS:"small GTPases" OR TITLE_ABS:"Ras superfamily" OR
+      TITLE_ABS:KRAS OR TITLE_ABS:"K-Ras" OR TITLE_ABS:NRAS OR TITLE_ABS:HRAS OR TITLE_ABS:"Rho GTPase"
+      OR TITLE_ABS:"Rho GTPases" OR TITLE_ABS:RhoA OR TITLE_ABS:Rac1 OR TITLE_ABS:Cdc42 OR
+      TITLE_ABS:"Rab GTPase" OR TITLE_ABS:"Rab GTPases" OR TITLE_ABS:"Arf GTPase" OR TITLE_ABS:Rheb OR
+      TITLE_ABS:SOS1 OR TITLE_ABS:"guanine nucleotide exchange factor" OR TITLE_ABS:"GTPase-activating
+      protein") AND (TITLE_ABS:"drug discovery" OR TITLE_ABS:"drug design" OR
+      TITLE_ABS:"structure-based" OR TITLE_ABS:"small molecule" OR TITLE_ABS:"small molecules" OR
+      TITLE_ABS:"small-molecule" OR TITLE_ABS:inhibitor OR TITLE_ABS:inhibitors OR TITLE_ABS:"virtual
+      screening" OR TITLE_ABS:docking OR TITLE_ABS:"molecular dynamics" OR TITLE_ABS:binder OR
+      TITLE_ABS:binders OR TITLE_ABS:degrader OR TITLE_ABS:degraders OR TITLE_ABS:stabilizer OR
+      TITLE_ABS:stabilizers)) OR ((TITLE_ABS:"molecular glue" OR TITLE_ABS:"molecular glues" OR
+      TITLE_ABS:"cyclic peptide" OR TITLE_ABS:"cyclic peptides" OR TITLE_ABS:"macrocyclic peptide" OR
+      TITLE_ABS:"macrocyclic peptides" OR TITLE_ABS:undruggable) AND (TITLE_ABS:"drug discovery" OR
+      TITLE_ABS:"drug design" OR TITLE_ABS:"structure-based" OR TITLE_ABS:"small molecule" OR
+      TITLE_ABS:"small molecules" OR TITLE_ABS:"small-molecule" OR TITLE_ABS:inhibitor OR
+      TITLE_ABS:inhibitors OR TITLE_ABS:"virtual screening" OR TITLE_ABS:docking OR TITLE_ABS:"molecular
+      dynamics" OR TITLE_ABS:binder OR TITLE_ABS:binders OR TITLE_ABS:degrader OR TITLE_ABS:degraders OR
+      TITLE_ABS:stabilizer OR TITLE_ABS:stabilizers)) OR ((TITLE_ABS:"protein-protein interaction" OR
+      TITLE_ABS:"protein-protein interactions" OR TITLE_ABS:"protein-protein interface") AND
+      (TITLE_ABS:"drug discovery" OR TITLE_ABS:"drug design" OR TITLE_ABS:"structure-based" OR
+      TITLE_ABS:"small molecule" OR TITLE_ABS:"small molecules" OR TITLE_ABS:"small-molecule" OR
+      TITLE_ABS:stabilizer OR TITLE_ABS:stabilizers OR TITLE_ABS:stabilization OR TITLE_ABS:peptide OR
+      TITLE_ABS:peptides)) OR ((TITLE_ABS:generative OR TITLE_ABS:"deep learning" OR TITLE_ABS:"machine
+      learning" OR TITLE_ABS:"diffusion model" OR TITLE_ABS:"language model") AND (TITLE_ABS:"molecular
+      design" OR TITLE_ABS:"de novo design" OR TITLE_ABS:"drug design" OR TITLE_ABS:"binder design" OR
+      TITLE_ABS:"peptide design" OR TITLE_ABS:"molecule generation"))) NOT (TITLE_ABS:"network
+      pharmacology" OR TITLE_ABS:"network toxicology" OR TITLE_ABS:decoction OR TITLE_ABS:"traditional
+      Chinese medicine" OR TITLE_ABS:"hub gene" OR TITLE_ABS:"hub genes" OR TITLE_ABS:"Mendelian
+      randomization" OR TITLE_ABS:herbal)
+  openalex:         {enabled: false}   # matches full text: too noisy for this query
+  semantic_scholar: {enabled: false}   # often rate-limited without an API key
+  arxiv:            {enabled: true}    # AI-driven molecular, binder and peptide design
+
+# A broad field (~300 PubMed papers a month), so rank from a bigger pool than the default 50.
+candidate_pool: 100
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals).
+journals: []
+
+ranking:
+  # Always score full marks for these. Authors: OpenAlex ID (python -m digest.openalex "Author Name")
+  # or exact name.
+  preferred_authors: []
+  preferred_journals: []
+
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords
+  # (case and -/space ignored; whole words must match, so "Molecular Glues" doesn't match "molecular glue").
+  key_words: ["Structure-Based Drug Discovery", "Small GTPases", "Protein–Protein Interactions",
+              "AI-Driven Molecular Design", "Cyclic Peptides", "Molecular Glues"]
+
+# Where to post. to_env / webhook_env = the NAME of the secret holding the addresses / URL
+# (in .env when running locally, a repository secret on GitHub; a new name also needs a line
+# in the Run digest step of .github/workflows/digest.yml).
+outputs:
+  slack:
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
+    chinese_summary: false
+  wecom:
+    enabled: false
+    webhook_env: WeCom_URL
+    chinese_summary: false
+  email:
+    enabled: true
+    to_env: EMAIL_TO_FAN_SHIJIE   # secret with the addresses, comma-separated
+    chinese_summary: false
