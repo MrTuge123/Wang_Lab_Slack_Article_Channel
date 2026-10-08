@@ -1,0 +1,127 @@
+# Huang Shengyuan. Any setting from config.yaml can be overridden here.
+name: "Huang Shengyuan"
+
+# What to search for, in PubMed syntax ([tiab] = title/abstract, [pt] = publication type). Any of:
+#   heart / cardiac / cardiovascular terms   AND senescence (senescent, senolytic, SASP)
+#   cardiac aging (aging/aged heart)
+#   HFpEF                                    AND macrophage, senescence, immunometabolism or inflammation
+#   heart terms AND macrophages              AND senescence, immunometabolism or Activin
+#   Activin A (activin, INHBA, follistatin)  AND heart, macrophage or senescence terms
+#   macrophage senescence phrases (senescent / aged macrophages), any tissue
+# minus traditional-medicine "decoction", network-pharmacology and Mendelian-randomization papers,
+# and correction notices. Preview:  python -m digest.query '<query>'
+query: >-
+  (((heart[tiab] OR cardiac[tiab] OR myocardial[tiab] OR myocardium[tiab] OR cardiomyocyte[tiab] OR
+  cardiomyocytes[tiab] OR cardiovascular[tiab] OR "heart failure"[tiab] OR cardiomyopathy[tiab] OR
+  HFpEF[tiab]) AND (senescence[tiab] OR senescent[tiab] OR senolytic[tiab] OR senolytics[tiab] OR
+  SASP[tiab] OR "senescence-associated"[tiab])) OR (("cardiac aging"[tiab] OR "cardiac ageing"[tiab] OR
+  "aging heart"[tiab] OR "ageing heart"[tiab] OR "aged heart"[tiab] OR "aged hearts"[tiab])) OR (("heart
+  failure with preserved ejection fraction"[tiab] OR HFpEF[tiab]) AND (macrophage[tiab] OR
+  macrophages[tiab] OR monocyte[tiab] OR monocytes[tiab] OR senescence[tiab] OR senescent[tiab] OR
+  senolytic[tiab] OR senolytics[tiab] OR SASP[tiab] OR "senescence-associated"[tiab] OR
+  immunometabolism[tiab] OR immunometabolic[tiab] OR "immune-metabolic"[tiab] OR "metabolic
+  reprogramming"[tiab] OR inflammation[tiab] OR inflammatory[tiab])) OR ((heart[tiab] OR cardiac[tiab]
+  OR myocardial[tiab] OR myocardium[tiab] OR cardiomyocyte[tiab] OR cardiomyocytes[tiab] OR
+  cardiovascular[tiab] OR "heart failure"[tiab] OR cardiomyopathy[tiab] OR HFpEF[tiab]) AND
+  (macrophage[tiab] OR macrophages[tiab] OR monocyte[tiab] OR monocytes[tiab]) AND (senescence[tiab] OR
+  senescent[tiab] OR senolytic[tiab] OR senolytics[tiab] OR SASP[tiab] OR "senescence-associated"[tiab]
+  OR immunometabolism[tiab] OR immunometabolic[tiab] OR "immune-metabolic"[tiab] OR "metabolic
+  reprogramming"[tiab] OR "activin A"[tiab] OR activin[tiab] OR activins[tiab] OR INHBA[tiab] OR
+  "activin receptor"[tiab] OR follistatin[tiab])) OR (("activin A"[tiab] OR activin[tiab] OR
+  activins[tiab] OR INHBA[tiab] OR "activin receptor"[tiab] OR follistatin[tiab]) AND (heart[tiab] OR
+  cardiac[tiab] OR myocardial[tiab] OR myocardium[tiab] OR cardiomyocyte[tiab] OR cardiomyocytes[tiab]
+  OR cardiovascular[tiab] OR "heart failure"[tiab] OR cardiomyopathy[tiab] OR HFpEF[tiab] OR
+  macrophage[tiab] OR macrophages[tiab] OR monocyte[tiab] OR monocytes[tiab] OR senescence[tiab] OR
+  senescent[tiab] OR senolytic[tiab] OR senolytics[tiab] OR SASP[tiab] OR
+  "senescence-associated"[tiab])) OR (("macrophage senescence"[tiab] OR "senescent macrophage"[tiab] OR
+  "senescent macrophages"[tiab] OR "macrophage aging"[tiab] OR "macrophage ageing"[tiab] OR "aged
+  macrophages"[tiab] OR "aging macrophages"[tiab]))) NOT (decoction[tiab] OR "network
+  pharmacology"[tiab] OR "traditional Chinese medicine"[tiab] OR "Mendelian randomization"[tiab] OR
+  "Published Erratum"[pt])
+
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it.
+interest: >-
+  Cardiovascular disease and cardiac aging, focusing on the roles of cellular senescence,
+  immune-metabolic interactions, and Activin A signaling in macrophage dysfunction, cardiac remodeling,
+  and heart failure with preserved ejection fraction (HFpEF).
+
+# Where to search besides PubMed. Europe PMC gets its own copy of the query restricted to title +
+# abstract (otherwise it would also match full text); it adds bioRxiv and other preprints.
+sources:
+  europepmc:
+    enabled: true
+    query: >-
+      (((TITLE_ABS:heart OR TITLE_ABS:cardiac OR TITLE_ABS:myocardial OR TITLE_ABS:myocardium OR
+      TITLE_ABS:cardiomyocyte OR TITLE_ABS:cardiomyocytes OR TITLE_ABS:cardiovascular OR
+      TITLE_ABS:"heart failure" OR TITLE_ABS:cardiomyopathy OR TITLE_ABS:HFpEF) AND
+      (TITLE_ABS:senescence OR TITLE_ABS:senescent OR TITLE_ABS:senolytic OR TITLE_ABS:senolytics OR
+      TITLE_ABS:SASP OR TITLE_ABS:"senescence-associated")) OR ((TITLE_ABS:"cardiac aging" OR
+      TITLE_ABS:"cardiac ageing" OR TITLE_ABS:"aging heart" OR TITLE_ABS:"ageing heart" OR
+      TITLE_ABS:"aged heart" OR TITLE_ABS:"aged hearts")) OR ((TITLE_ABS:"heart failure with preserved
+      ejection fraction" OR TITLE_ABS:HFpEF) AND (TITLE_ABS:macrophage OR TITLE_ABS:macrophages OR
+      TITLE_ABS:monocyte OR TITLE_ABS:monocytes OR TITLE_ABS:senescence OR TITLE_ABS:senescent OR
+      TITLE_ABS:senolytic OR TITLE_ABS:senolytics OR TITLE_ABS:SASP OR TITLE_ABS:"senescence-associated"
+      OR TITLE_ABS:immunometabolism OR TITLE_ABS:immunometabolic OR TITLE_ABS:"immune-metabolic" OR
+      TITLE_ABS:"metabolic reprogramming" OR TITLE_ABS:inflammation OR TITLE_ABS:inflammatory)) OR
+      ((TITLE_ABS:heart OR TITLE_ABS:cardiac OR TITLE_ABS:myocardial OR TITLE_ABS:myocardium OR
+      TITLE_ABS:cardiomyocyte OR TITLE_ABS:cardiomyocytes OR TITLE_ABS:cardiovascular OR
+      TITLE_ABS:"heart failure" OR TITLE_ABS:cardiomyopathy OR TITLE_ABS:HFpEF) AND
+      (TITLE_ABS:macrophage OR TITLE_ABS:macrophages OR TITLE_ABS:monocyte OR TITLE_ABS:monocytes) AND
+      (TITLE_ABS:senescence OR TITLE_ABS:senescent OR TITLE_ABS:senolytic OR TITLE_ABS:senolytics OR
+      TITLE_ABS:SASP OR TITLE_ABS:"senescence-associated" OR TITLE_ABS:immunometabolism OR
+      TITLE_ABS:immunometabolic OR TITLE_ABS:"immune-metabolic" OR TITLE_ABS:"metabolic reprogramming"
+      OR TITLE_ABS:"activin A" OR TITLE_ABS:activin OR TITLE_ABS:activins OR TITLE_ABS:INHBA OR
+      TITLE_ABS:"activin receptor" OR TITLE_ABS:follistatin)) OR ((TITLE_ABS:"activin A" OR
+      TITLE_ABS:activin OR TITLE_ABS:activins OR TITLE_ABS:INHBA OR TITLE_ABS:"activin receptor" OR
+      TITLE_ABS:follistatin) AND (TITLE_ABS:heart OR TITLE_ABS:cardiac OR TITLE_ABS:myocardial OR
+      TITLE_ABS:myocardium OR TITLE_ABS:cardiomyocyte OR TITLE_ABS:cardiomyocytes OR
+      TITLE_ABS:cardiovascular OR TITLE_ABS:"heart failure" OR TITLE_ABS:cardiomyopathy OR
+      TITLE_ABS:HFpEF OR TITLE_ABS:macrophage OR TITLE_ABS:macrophages OR TITLE_ABS:monocyte OR
+      TITLE_ABS:monocytes OR TITLE_ABS:senescence OR TITLE_ABS:senescent OR TITLE_ABS:senolytic OR
+      TITLE_ABS:senolytics OR TITLE_ABS:SASP OR TITLE_ABS:"senescence-associated")) OR
+      ((TITLE_ABS:"macrophage senescence" OR TITLE_ABS:"senescent macrophage" OR TITLE_ABS:"senescent
+      macrophages" OR TITLE_ABS:"macrophage aging" OR TITLE_ABS:"macrophage ageing" OR TITLE_ABS:"aged
+      macrophages" OR TITLE_ABS:"aging macrophages"))) NOT (TITLE_ABS:decoction OR TITLE_ABS:"network
+      pharmacology" OR TITLE_ABS:"traditional Chinese medicine" OR TITLE_ABS:"Mendelian randomization"
+      OR PUB_TYPE:"Published Erratum")
+  openalex:         {enabled: false}   # matches full text: too noisy for this query
+  semantic_scholar: {enabled: false}   # often rate-limited without an API key
+  arxiv:            {enabled: false}   # little cardiovascular biology
+
+# ~150 PubMed papers a month, so rank from a bigger pool than the default 50.
+candidate_pool: 100
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals).
+journals: []
+
+ranking:
+  # Always score full marks for these. Authors: OpenAlex ID (python -m digest.openalex "Author Name")
+  # or exact name.
+  preferred_authors: []
+  preferred_journals: []
+
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords
+  # (case and -/space ignored; whole words must match).
+  key_words: ["Cardiovascular disease", "Heart failure with preserved ejection fraction (HFpEF)",
+              "Macrophage senescence", "Immunometabolism", "Activin A signaling"]
+
+  # Hard filters (0 = off). Preferred authors/journals always pass.
+  min_journal_citedness: 5     # min journal's 2-year mean citations (~ impact factor); preprints exempt
+
+# Where to post. to_env / webhook_env = the NAME of the secret holding the addresses / URL
+# (in .env when running locally, a repository secret on GitHub; a new name also needs a line
+# in the Run digest step of .github/workflows/digest.yml).
+outputs:
+  slack:
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
+    chinese_summary: false
+  wecom:
+    enabled: false
+    webhook_env: WeCom_URL
+    chinese_summary: false
+  email:
+    enabled: true
+    to_env: EMAIL_TO_HUANG_SHENGYUAN   # secret with the addresses, comma-separated
+    chinese_summary: false
