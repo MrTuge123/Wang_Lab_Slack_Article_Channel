@@ -54,13 +54,13 @@ def connection_lines(c):
                      f"paper{'s' * (c['linked'] != 1)} in your history. Most shared:")
         for s in c["shared"]:
             year = f" ({s['year']})" if s.get("year") else ""
-            lines.append(f"• {_clip(s['title'], 90)}{year}: cited by {s['now']} of "
-                         f"{'it' if n == 1 else 'these'} and {s['earlier']} earlier")
+            here = "this paper" if n == 1 else f"{s['now']} of these ({'; '.join(s.get('by') or [])})"
+            lines.append(f"• {_clip(s['title'], 90)}{year}: cited by {here} and {s['earlier']} earlier")
     if c["direct"]:
         lines.append(f"Direct citations of earlier papers ({c['n_direct']}):")
         for d in c["direct"]:
             how = f"sent to you on {_day(d['date'])}" if d["sent"] else f"a candidate on {_day(d['date'])}, not sent"
-            lines.append(f"• “{_clip(d['citing'], 60)}” cites “{_clip(d['title'], 70)}” ({how})")
+            lines.append(f"• {d['citing']} cites “{_clip(d['title'], 70)}” ({how})")
     if c["with_refs"] < n:
         lines.append(f"({c['with_refs']} of {n} papers have reference data so far.)")
     return lines

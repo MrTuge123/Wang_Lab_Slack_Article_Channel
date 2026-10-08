@@ -14,7 +14,7 @@ from digest import paper as _paper
 
 BASE = "https://api.openalex.org"
 KEY = os.getenv("OPENALEX_API_KEY")
-WORK_FIELDS = "id,doi,type,authorships,primary_location,keywords,referenced_works"
+WORK_FIELDS = "id,doi,type,publication_year,authorships,primary_location,keywords,referenced_works"
 session = requests.Session()
 _author_cache, _source_cache = {}, {}
 
@@ -189,6 +189,7 @@ def enrich(papers):
             continue
         p["openalex_id"] = _short(w.get("id")) or p.get("openalex_id")
         p["references"] = [_short(r) for r in w.get("referenced_works") or []]   # [] = not known (yet)
+        p["year"] = w.get("publication_year") or p.get("year")
         auths = [a for a in w.get("authorships", []) if _author_id(a)]
         p["author_ids"] = [_author_id(a) for a in auths]
         p["author_names"] = [a["author"].get("display_name", "") for a in auths]

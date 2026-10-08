@@ -22,6 +22,33 @@ MIN_FOR_GENERIC = 20            # only call a reference generic once this many e
 MAX_REFRESH = 200               # earlier papers looked up again per run (4 OpenAlex requests at most)
 
 
+def _surname(name):
+    """'Xiaohong Wang' -> 'Wang'; 'Wang X' or 'Smith JA' (Europe PMC: initials last) -> 'Wang', 'Smith';
+    'Wang, Xiaohong' -> 'Wang'."""
+    name = name.strip()
+    if "," in name:
+        return name.split(",")[0].strip()
+    parts = name.split()
+    if len(parts) > 1 and parts[-1].isupper() and len(parts[-1].replace(".", "")) <= 3:
+        return " ".join(parts[:-1])
+    return parts[-1] if parts else ""
+
+
+def cite_label(p):
+    """Short citation for a paper: 'Wang et al. 2026', 'Wang and Li 2026', 'Wang 2026' (no year if unknown)."""
+    names = [s.title() if s.isupper() and len(s) > 3 else s
+             for s in (_surname(a) for a in p.get("authors") or []) if s]
+    if not names:
+        who = p["title"][:40].rstrip() + ("…" if len(p["title"]) > 40 else "")
+    elif len(names) == 1:
+        who = names[0]
+    elif len(names) == 2:
+        who = f"{names[0]} and {names[1]}"
+    else:
+        who = f"{names[0]} et al."
+    return f"{who} {p['year']}" if p.get("year") else who
+
+
 def settings(sub):
     return {**DEFAULTS, **(sub.get("connections") or {})}
 
@@ -63,7 +90,8 @@ def _refresh(hist, cfg):
 def find(top, sub):
     """(connections, refreshed). connections is None when there's nothing to show, else
     {"papers": n, "with_refs": k, "linked": earlier papers sharing references, "n_shared": shared works,
-     "shared": [{"title", "year", "now", "earlier"}], "direct": [{"citing", "title", "date", "sent"}]}.
+     "shared": [{"title", "year", "now", "earlier", "by": ['Wang et al. 2026', ...]}],
+     "direct": [{"citing": 'Wang et al. 2026', "title", "date", "sent"}]}.
     refreshed is what to save to history/ (see history.set_references)."""
     cfg = settings(sub)
     if not cfg["enabled"] or not top:
@@ -76,7 +104,7 @@ def find(top, sub):
 
     # Direct: a paper here cites an earlier one
     earlier = {r["openalex_id"]: r for r in hist if r.get("openalex_id")}
-    direct = [{"citing": p["title"], "title": earlier[w]["title"], "sent": bool(earlier[w].get("posted_at")),
+    direct = [{"citing": cite_label(p), "title": earlier[w]["title"], "sent": bool(earlier[w].get("posted_at")),
                "date": earlier[w].get("posted_at") or earlier[w]["first_seen"]}
               for p in top for w in dict.fromkeys(p.get("references") or []) if w in earlier]
     direct.sort(key=lambda d: (not d["sent"], d["date"]))
@@ -100,7 +128,8 @@ def find(top, sub):
         "linked": linked,
         "n_shared": len(shared),
         "shared": [{"title": (names.get(w) or {}).get("display_name") or w,
-                    "year": (names.get(w) or {}).get("publication_year"), "now": now[w], "earlier": before[w]}
+                    "year": (names.get(w) or {}).get("publication_year"), "now": now[w], "earlier": before[w],
+                    "by": [cite_label(p) for p in top if w in set(p.get("references") or [])]}
                    for w in shared[:cfg["max_items"]]],
         "direct": direct[:cfg["max_items"]],
         "n_direct": len(direct),
