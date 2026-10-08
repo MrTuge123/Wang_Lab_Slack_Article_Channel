@@ -53,6 +53,7 @@ jobs:
           WECOM_URL_EXAMPLE_LAB: ${{ secrets.WECOM_URL_EXAMPLE_LAB }}
           EMAIL_TO_WANG_LAB: ${{ secrets.EMAIL_TO_WANG_LAB }}
           EMAIL_TO_XINRUI_DONG: ${{ secrets.EMAIL_TO_XINRUI_DONG }}
+          EMAIL_TO_FAN_SHIJIE: ${{ secrets.EMAIL_TO_FAN_SHIJIE }}
           SUBSCRIBER: ${{ inputs.subscriber }}
         run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 
