@@ -14,7 +14,7 @@ from digest import paper as _paper
 
 BASE = "https://api.openalex.org"
 KEY = os.getenv("OPENALEX_API_KEY")
-WORK_FIELDS = "id,doi,type,authorships,primary_location,keywords"
+WORK_FIELDS = "id,doi,type,authorships,primary_location,keywords,referenced_works"
 session = requests.Session()
 _author_cache, _source_cache = {}, {}
 
@@ -32,6 +32,27 @@ def _get(path, **params):
 def _short(url):
     """'https://openalex.org/A123' -> 'A123'"""
     return url.rsplit("/", 1)[-1] if url else None
+
+
+def works_by_id(ids, select="id,display_name,publication_year"):
+    """{OpenAlex work ID ('W123'): work} for the given IDs, 50 per request."""
+    ids, out = list(dict.fromkeys(i for i in ids if i)), {}
+    for k in range(0, len(ids), 50):
+        data = _get("works", filter="openalex:" + "|".join(ids[k:k + 50]), per_page=50, select=select) or {}
+        for w in data.get("results", []):
+            out[_short(w["id"])] = w
+    return out
+
+
+def works_by_doi(dois, select="id,doi,referenced_works"):
+    """{DOI (lower case, no https://doi.org/): work} for the given DOIs, 50 per request."""
+    dois, out = list(dict.fromkeys(d for d in dois if d and not any(c in d for c in ",|"))), {}
+    for k in range(0, len(dois), 50):
+        data = _get("works", filter="doi:" + "|".join(dois[k:k + 50]), per_page=50, select=select) or {}
+        for w in data.get("results", []):
+            if w.get("doi"):
+                out[_clean_doi(w["doi"])] = w
+    return out
 
 
 def _clean_doi(doi):
@@ -166,6 +187,8 @@ def enrich(papers):
         p["oa_matched"] = w is not None
         if not w:
             continue
+        p["openalex_id"] = _short(w.get("id")) or p.get("openalex_id")
+        p["references"] = [_short(r) for r in w.get("referenced_works") or []]   # [] = not known (yet)
         auths = [a for a in w.get("authorships", []) if _author_id(a)]
         p["author_ids"] = [_author_id(a) for a in auths]
         p["author_names"] = [a["author"].get("display_name", "") for a in auths]

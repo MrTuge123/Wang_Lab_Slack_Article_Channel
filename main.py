@@ -18,9 +18,9 @@ import traceback
 
 import requests
 
-from digest import notify, openalex, paper, ranking, relevance, sources, summarizer
+from digest import connections, notify, openalex, paper, ranking, relevance, sources, summarizer
 from digest.config import load_subscribers
-from digest.history import save_history
+from digest.history import save_history, set_references
 from digest.store import load_seen, run_lock, save_seen
 
 
@@ -59,6 +59,14 @@ def run_subscriber(sub, dry_run=False):
         print("Translating into Chinese...")
         overview_zh = summarizer.translate_all(top, overview, sub["model"], sub)
     context = {"candidates": len(papers), "found": report, "overview": overview, "overview_zh": overview_zh}
+    refreshed = {}
+    try:                                    # links to earlier papers by references (OpenAlex, no Kimi)
+        context["connections"], refreshed = connections.find(top, sub)
+        c = context["connections"]
+        print(f"Connections: {c['n_shared']} shared references, {c['n_direct']} direct citations of earlier papers."
+              if c else "Connections: none to earlier papers.")
+    except requests.RequestException as e:
+        print(f"Warning: couldn't look up connections to earlier papers ({e}).")
 
     posted, failed = notify.post(top, sub, dry_run, context)
     if posted:                              # at least one chat has them, so don't post them again
@@ -67,6 +75,7 @@ def run_subscriber(sub, dry_run=False):
         print(f"Done: posted {len(top)} of {len(papers)} candidates to {' and '.join(posted)}.")
     if not dry_run:                         # every ranked candidate, for trend summaries
         save_history(sub["id"], papers, posted=top if posted else [])
+        set_references(sub["id"], refreshed)   # reference lists OpenAlex didn't have before
     return failed
 
 

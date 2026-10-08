@@ -2,7 +2,8 @@
 import requests
 
 from digest import paper
-from digest.notify.format import ZH_LABEL, date_range, digest_title, impact_line, stats_line
+from digest.notify.format import (CONNECTIONS_TITLE, ZH_LABEL, connection_lines, date_range, digest_title,
+                                  impact_line, stats_line)
 
 NAME = "WeCom"
 MAX_BYTES = 4096                        # WeCom rejects longer markdown messages
@@ -24,6 +25,8 @@ def build(top, sub, context=None):
         blocks.append(f"[{title}]({paper.url(p)})\n"
                       f'<font color="comment">{impact_line(p)}</font>\n'
                       f"{p['summary']}{zh}")
+    if context.get("connections"):
+        blocks.append(f"**{CONNECTIONS_TITLE}**\n" + "\n".join(connection_lines(context["connections"])))
     messages = []
     for b in blocks:
         if messages and len((messages[-1] + "\n\n" + b).encode()) <= MAX_BYTES:

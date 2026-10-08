@@ -21,6 +21,16 @@ sources:
 max_papers: 5             # s: papers posted per subscriber
 overview_min_relevance: 5 # the overview describes all candidates with at least this relevance (0-10)
 
+# ---- Connections to earlier papers (end of each digest; OpenAlex reference lists, no Kimi) ----
+# Shared references between this digest's papers and earlier ones in history/, and direct citations
+# of earlier papers. Shown only when there are any.
+connections:
+  enabled: true
+  min_relevance: 5     # earlier candidates count if they were posted or Kimi's relevance is at least this
+  max_share: 0.3       # leave out references cited by more than this share of history (GSEA, TCGA, surveys)
+  max_items: 3         # most-shared references and direct citations listed
+  refresh_days: 90     # look up references again for earlier papers this recent that had none
+
 # ---- Ranking by author / journal impact (data from OpenAlex) ----
 ranking:
   # Final score = weighted mix of relevance, author score and journal score (0-1),

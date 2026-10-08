@@ -32,6 +32,40 @@ def stats_line(top, context=None):
     return s
 
 
+CONNECTIONS_TITLE = "Connections to your earlier papers"
+
+
+def _clip(text, n):
+    return text if len(text) <= n else text[:n - 1].rstrip() + "…"
+
+
+def _day(iso):
+    d = dt.date.fromisoformat(iso)
+    return f"{d:%b} {d.day}"
+
+
+def connection_lines(c):
+    """The Connections section (digest/connections.py) as plain-text lines, without its title;
+    each chat adds its own markup."""
+    n, lines = c["papers"], []
+    if c["shared"]:
+        lines.append(f"{'This paper shares' if n == 1 else f'These {n} papers share'} {c['n_shared']} "
+                     f"reference{'s' * (c['n_shared'] != 1)} with {c['linked']} earlier "
+                     f"paper{'s' * (c['linked'] != 1)} in your history. Most shared:")
+        for s in c["shared"]:
+            year = f" ({s['year']})" if s.get("year") else ""
+            lines.append(f"• {_clip(s['title'], 90)}{year}: cited by {s['now']} of "
+                         f"{'it' if n == 1 else 'these'} and {s['earlier']} earlier")
+    if c["direct"]:
+        lines.append(f"Direct citations of earlier papers ({c['n_direct']}):")
+        for d in c["direct"]:
+            how = f"sent to you on {_day(d['date'])}" if d["sent"] else f"a candidate on {_day(d['date'])}, not sent"
+            lines.append(f"• “{_clip(d['citing'], 60)}” cites “{_clip(d['title'], 70)}” ({how})")
+    if c["with_refs"] < n:
+        lines.append(f"({c['with_refs']} of {n} papers have reference data so far.)")
+    return lines
+
+
 def impact_line(p):
     """'Journal · top author: Name (first, h=40) · keywords: GNN · relevance 8/10 · score 0.72'"""
     bits = [p["journal"]]

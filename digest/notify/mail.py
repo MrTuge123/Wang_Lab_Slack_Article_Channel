@@ -20,7 +20,8 @@ from email.message import EmailMessage
 from email.utils import formataddr
 
 from digest import env, paper
-from digest.notify.format import ZH_LABEL, date_range, digest_title, impact_line, stats_line
+from digest.notify.format import (CONNECTIONS_TITLE, ZH_LABEL, connection_lines, date_range, digest_title,
+                                  impact_line, stats_line)
 
 NAME = "Email"
 SENDER_NAME = "Paper Digest"
@@ -101,7 +102,7 @@ def _paper_html(i, p):
 def build(top, sub, context=None):
     """One email: an HTML newsletter plus a plain-text version.
     context (optional): {"candidates": int, "found": {source name: count or error},
-    "overview": str or None, "overview_zh": str or None}."""
+    "overview": str or None, "overview_zh": str or None, "connections": see digest/connections.py}."""
     context = context or {}
     today = dt.date.today()
     n = len(top)
@@ -110,6 +111,7 @@ def build(top, sub, context=None):
         or [s for s in SOURCE_NAMES if s in {x for p in top for x in p.get("sources", [])}]
     stats = stats_line(top, context)
     overview, overview_zh = context.get("overview"), context.get("overview_zh")
+    conn = connection_lines(context["connections"]) if context.get("connections") else []
     e = html.escape
 
     # --- plain text
@@ -122,6 +124,8 @@ def build(top, sub, context=None):
         if p.get("summary_zh"):
             text += ["   " + ZH_LABEL + p["summary_zh"], ""]
         text += [f"   {label}: {u}" for label, u in paper.links(p)] + [""]
+    if conn:
+        text += [CONNECTIONS_TITLE] + conn + [""]
     text += ["Searched: " + ", ".join(searched)]
 
     # --- HTML
@@ -133,6 +137,14 @@ def build(top, sub, context=None):
     <tr><td style="padding:0 28px 22px">
       <div style="background:{BG};border-radius:8px;padding:14px 16px;color:{INK};font-size:14px;line-height:21px">
         <span style="font-weight:600">Overview</span> &nbsp;{e(overview)}{zh}</div>
+    </td></tr>"""
+    conn_html = ""
+    if conn:
+        rows = "".join(f'<div style="margin-top:4px">{e(x)}</div>' for x in conn)
+        conn_html = f"""
+    <tr><td style="padding:18px 28px 6px;border-top:1px solid {LINE}">
+      <div style="background:{BG};border-radius:8px;padding:14px 16px;color:{INK};font-size:13px;line-height:20px">
+        <div style="font-weight:600;font-size:14px">{e(CONNECTIONS_TITLE)}</div>{rows}</div>
     </td></tr>"""
     body = f"""<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>{e(subject)}</title></head>
@@ -148,7 +160,7 @@ def build(top, sub, context=None):
       <div style="color:{INK};font-size:24px;font-weight:700;line-height:30px;margin-top:6px">{e(sub["name"])}</div>
       <div style="color:{MUTED};font-size:14px;margin-top:4px">{e(date_range(sub))} · {e(stats)}</div>
     </td></tr>{overview_html}
-    {"".join(_paper_html(i, p) for i, p in enumerate(top, 1))}
+    {"".join(_paper_html(i, p) for i, p in enumerate(top, 1))}{conn_html}
     <tr><td style="padding:18px 28px 24px;border-top:1px solid {LINE};color:{FAINT};font-size:12px;line-height:18px">
       Searched {e(", ".join(searched))}. Ranked by relevance (judged by an AI model), author h-index, journal impact and keyword matches;
       summaries are written by an AI model and may contain mistakes.<br>

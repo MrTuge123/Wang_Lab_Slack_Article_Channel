@@ -49,6 +49,8 @@ def record(p, rank, today, posted):
         "pmid": p["pmid"],
         "doi": p["doi"],
         "arxiv_id": p["arxiv_id"],
+        "openalex_id": p.get("openalex_id"),
+        "references": p.get("references"),              # OpenAlex IDs of the works it cites ([] = not known yet)
         "sources": p["sources"],
         "ids": sorted(paper.ids(p)),                    # what duplicates are matched on
     }
@@ -107,6 +109,22 @@ def save_history(sid, ranked, posted):
     new = [record(p, rank, today, p in posted) for rank, p in enumerate(ranked, 1)]
     path = history_path(sid)
     _write(path, read_history(path) + new)
+
+
+def set_references(sid, updates):
+    """Save OpenAlex IDs and reference lists looked up after a paper was first saved
+    (digest/connections.py): updates is {OpenAlex ID or DOI: {"openalex_id", "references"}}."""
+    if not updates:
+        return
+    path = history_path(sid)
+    records = read_history(path)
+    for r in records:
+        u = updates.get(r.get("openalex_id")) or updates.get(r.get("doi"))
+        if u:
+            r["openalex_id"] = r.get("openalex_id") or u["openalex_id"]
+            if u["references"]:
+                r["references"] = u["references"]
+    _write(path, records)
 
 
 if __name__ == "__main__":
