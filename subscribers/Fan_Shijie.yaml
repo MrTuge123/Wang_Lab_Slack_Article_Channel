@@ -99,7 +99,7 @@ ranking:
   # (case and -/space ignored; whole words must match, so "Molecular Glues" doesn't match "molecular glue").
   key_words: ["Structure-Based Drug Discovery", "Small GTPases", "Protein–Protein Interactions",
               "AI-Driven Molecular Design", "Cyclic Peptides", "Molecular Glues"]
-
+  min_author_h_index: 5
 # Where to post. to_env / webhook_env = the NAME of the secret holding the addresses / URL
 # (in .env when running locally, a repository secret on GitHub; a new name also needs a line
 # in the Run digest step of .github/workflows/digest.yml).
