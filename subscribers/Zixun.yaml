@@ -1,0 +1,109 @@
+# Zixun. Any setting from config.yaml can be overridden here.
+name: "Zixun"
+
+# What to search for, in PubMed syntax ([tiab] = title/abstract, [ti] = title, [pt] = publication type).
+# Any of:
+#   heart failure / hypertrophy / cardiomyopathy terms AND mitochondria or energy metabolism
+#   adipose tissue (brown/beige fat, thermogenesis, UCP1, adipokines, epicardial fat) AND heart terms
+#   brown fat AND systemic metabolism (energy expenditure, insulin sensitivity, glucose homeostasis)
+#   heart failure / hypertrophy / cardiomyopathy terms AND metabolic adaptation or reprogramming
+# minus traditional-medicine "decoction", network-pharmacology and Mendelian-randomization papers,
+# correction notices and case reports. Preview:  python -m digest.query '<query>'
+query: >-
+  ((("heart failure"[tiab] OR "cardiac hypertrophy"[tiab] OR cardiomyopathy[tiab] OR "cardiac
+  remodeling"[tiab] OR "cardiac remodelling"[tiab] OR "cardiac dysfunction"[tiab] OR "diabetic
+  cardiomyopathy"[tiab]) AND (mitochondria[tiab] OR mitochondrial[tiab] OR mitophagy[tiab] OR "oxidative
+  phosphorylation"[tiab] OR "fatty acid oxidation"[tiab] OR bioenergetics[tiab] OR "energy
+  metabolism"[tiab] OR "cardiac metabolism"[tiab] OR "metabolic remodeling"[tiab] OR "metabolic
+  remodelling"[tiab])) OR ((adipose[tiab] OR adipocyte[tiab] OR adipocytes[tiab] OR "brown fat"[tiab] OR
+  "beige adipocytes"[tiab] OR thermogenesis[tiab] OR UCP1[tiab] OR adipokine[tiab] OR adipokines[tiab]
+  OR batokine[tiab] OR batokines[tiab] OR "epicardial fat"[tiab] OR "perivascular adipose"[tiab]) AND
+  (heart[tiab] OR cardiac[tiab] OR cardiomyocyte[tiab] OR cardiomyocytes[tiab] OR myocardial[tiab] OR
+  myocardium[tiab] OR cardiomyopathy[tiab])) OR (("brown adipose tissue"[tiab] OR "brown
+  adipocytes"[tiab] OR "brown fat"[tiab] OR "beige adipocytes"[tiab] OR thermogenic[tiab]) AND
+  ("systemic metabolism"[tiab] OR "energy expenditure"[tiab] OR "whole-body metabolism"[tiab] OR
+  "insulin sensitivity"[tiab] OR "glucose homeostasis"[tiab] OR "metabolic health"[tiab])) OR (("heart
+  failure"[tiab] OR "cardiac hypertrophy"[tiab] OR cardiomyopathy[tiab] OR "cardiac remodeling"[tiab] OR
+  "cardiac remodelling"[tiab] OR "cardiac dysfunction"[tiab] OR "diabetic cardiomyopathy"[tiab]) AND
+  ("metabolic adaptation"[tiab] OR "metabolic reprogramming"[tiab] OR "metabolic flexibility"[tiab] OR
+  "substrate utilization"[tiab] OR ketone[tiab] OR "ketone bodies"[tiab]))) NOT (decoction[tiab] OR
+  "network pharmacology"[tiab] OR "traditional Chinese medicine"[tiab] OR "Mendelian
+  randomization"[tiab] OR "Published Erratum"[pt] OR "Case Reports"[pt])
+
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it.
+interest: >-
+  Cardiovascular disease and systemic metabolism, focusing on the roles of mitochondrial function,
+  metabolic regulation, and adipose tissue–heart crosstalk in cardiac hypertrophy and heart failure,
+  with particular interest in the molecular mechanisms underlying cardiac dysfunction and metabolic
+  adaptation.
+
+# Where to search besides PubMed. Europe PMC gets its own copy of the query restricted to title +
+# abstract (otherwise it would also match full text); it adds bioRxiv and other preprints.
+sources:
+  europepmc:
+    enabled: true
+    query: >-
+      (((TITLE_ABS:"heart failure" OR TITLE_ABS:"cardiac hypertrophy" OR TITLE_ABS:cardiomyopathy OR
+      TITLE_ABS:"cardiac remodeling" OR TITLE_ABS:"cardiac remodelling" OR TITLE_ABS:"cardiac
+      dysfunction" OR TITLE_ABS:"diabetic cardiomyopathy") AND (TITLE_ABS:mitochondria OR
+      TITLE_ABS:mitochondrial OR TITLE_ABS:mitophagy OR TITLE_ABS:"oxidative phosphorylation" OR
+      TITLE_ABS:"fatty acid oxidation" OR TITLE_ABS:bioenergetics OR TITLE_ABS:"energy metabolism" OR
+      TITLE_ABS:"cardiac metabolism" OR TITLE_ABS:"metabolic remodeling" OR TITLE_ABS:"metabolic
+      remodelling")) OR ((TITLE_ABS:adipose OR TITLE_ABS:adipocyte OR TITLE_ABS:adipocytes OR
+      TITLE_ABS:"brown fat" OR TITLE_ABS:"beige adipocytes" OR TITLE_ABS:thermogenesis OR TITLE_ABS:UCP1
+      OR TITLE_ABS:adipokine OR TITLE_ABS:adipokines OR TITLE_ABS:batokine OR TITLE_ABS:batokines OR
+      TITLE_ABS:"epicardial fat" OR TITLE_ABS:"perivascular adipose") AND (TITLE_ABS:heart OR
+      TITLE_ABS:cardiac OR TITLE_ABS:cardiomyocyte OR TITLE_ABS:cardiomyocytes OR TITLE_ABS:myocardial
+      OR TITLE_ABS:myocardium OR TITLE_ABS:cardiomyopathy)) OR ((TITLE_ABS:"brown adipose tissue" OR
+      TITLE_ABS:"brown adipocytes" OR TITLE_ABS:"brown fat" OR TITLE_ABS:"beige adipocytes" OR
+      TITLE_ABS:thermogenic) AND (TITLE_ABS:"systemic metabolism" OR TITLE_ABS:"energy expenditure" OR
+      TITLE_ABS:"whole-body metabolism" OR TITLE_ABS:"insulin sensitivity" OR TITLE_ABS:"glucose
+      homeostasis" OR TITLE_ABS:"metabolic health")) OR ((TITLE_ABS:"heart failure" OR
+      TITLE_ABS:"cardiac hypertrophy" OR TITLE_ABS:cardiomyopathy OR TITLE_ABS:"cardiac remodeling" OR
+      TITLE_ABS:"cardiac remodelling" OR TITLE_ABS:"cardiac dysfunction" OR TITLE_ABS:"diabetic
+      cardiomyopathy") AND (TITLE_ABS:"metabolic adaptation" OR TITLE_ABS:"metabolic reprogramming" OR
+      TITLE_ABS:"metabolic flexibility" OR TITLE_ABS:"substrate utilization" OR TITLE_ABS:ketone OR
+      TITLE_ABS:"ketone bodies"))) NOT (TITLE_ABS:decoction OR TITLE_ABS:"network pharmacology" OR
+      TITLE_ABS:"traditional Chinese medicine" OR TITLE_ABS:"Mendelian randomization" OR
+      PUB_TYPE:"Published Erratum" OR PUB_TYPE:"Case Reports")
+  openalex:         {enabled: false}   # matches full text: too noisy for this query
+  semantic_scholar: {enabled: false}   # often rate-limited without an API key
+  arxiv:            {enabled: false}   # little cardiovascular biology
+
+# ~270 PubMed papers a month, so rank from a bigger pool than the default 50.
+candidate_pool: 100
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals).
+journals: []
+
+ranking:
+  # Always score full marks for these. Authors: OpenAlex ID (python -m digest.openalex "Author Name")
+  # or exact name.
+  preferred_authors: []
+  preferred_journals: []
+
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords
+  # (case and -/space ignored; whole words must match).
+  key_words: ["Heart failure", "Cardiomyopathy", "Mitochondrial metabolism", "Brown adipose tissue and
+              systemic metabolism", "Adipose tissue–heart crosstalk"]
+
+  # Hard filters (0 = off). Preferred authors/journals always pass.
+  # min_journal_citedness: 5   # min journal's 2-year mean citations (~ impact factor); preprints exempt
+
+# Where to post. to_env / webhook_env = the NAME of the secret holding the addresses / URL
+# (in .env when running locally, a repository secret on GitHub; a new name also needs a line
+# in the Run digest step of .github/workflows/digest.yml).
+outputs:
+  slack:
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
+    chinese_summary: false
+  wecom:
+    enabled: false
+    webhook_env: WeCom_URL
+    chinese_summary: false
+  email:
+    enabled: true
+    to_env: EMAIL_TO_ZIXUN   # secret with the addresses, comma-separated
+    chinese_summary: false

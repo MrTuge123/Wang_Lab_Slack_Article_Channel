@@ -55,6 +55,8 @@ jobs:
           EMAIL_TO_XINRUI_DONG: ${{ secrets.EMAIL_TO_XINRUI_DONG }}
           EMAIL_TO_FAN_SHIJIE: ${{ secrets.EMAIL_TO_FAN_SHIJIE }}
           EMAIL_TO_HUANG_SHENGYUAN: ${{ secrets.EMAIL_TO_HUANG_SHENGYUAN }}
+          EMAIL_TO_ZIXUN: ${{ secrets.EMAIL_TO_ZIXUN }}
+          EMAIL_TO_JIAQI: ${{ secrets.EMAIL_TO_JIAQI }}
           SUBSCRIBER: ${{ inputs.subscriber }}
         run: python main.py ${SUBSCRIBER:+--subscriber "$SUBSCRIBER"}
 
