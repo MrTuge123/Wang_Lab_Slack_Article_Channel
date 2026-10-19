@@ -83,7 +83,7 @@ def _wait(err, attempt):
         return 20 * (attempt + 1)
 
 
-def _complete(system, user, model, max_tokens=None):
+def _complete(system, user, model, max_tokens=None, thinking=True):
     """(reply text, finish_reason) of one chat completion. Retries with waits on rate limits
     (new Kimi accounts allow only 3 requests/min; Groq's free tier ~8K tokens/min);
     raises RateLimited if it never gets through.
