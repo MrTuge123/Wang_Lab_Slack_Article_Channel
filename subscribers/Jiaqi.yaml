@@ -1,0 +1,109 @@
+# Jiaqi. Any setting from config.yaml can be overridden here.
+name: "Jiaqi"
+
+# What to search for, in PubMed syntax ([tiab] = title/abstract, [ti] = title, [pt] = publication type).
+# Any of:
+#   heart-brain axis phrases (heart-brain, brain-heart, stroke-heart, neurocardiac)
+#   exercise AND cardioprotection, cardiac hypertrophy, cardiomyocytes, regeneration or systemic metabolism
+#     (minus clinical exercise testing and rehabilitation titles)
+#   physiological vs pathological cardiac hypertrophy
+#   cardiac fibrosis / fibroblasts / remodeling AND heart failure
+#   cardiac regeneration or repair (incl. cardiomyocyte proliferation)
+# minus traditional-medicine "decoction", network-pharmacology and Mendelian-randomization papers,
+# correction notices and case reports. Preview:  python -m digest.query '<query>'
+query: >-
+  ((("heart-brain"[tiab] OR "brain-heart"[tiab] OR "heart-brain axis"[tiab] OR "brain-heart axis"[tiab]
+  OR cerebrocardiac[tiab] OR "stroke-heart"[tiab] OR neurocardiac[tiab] OR neurocardiology[tiab])) OR
+  (((exercise[tiab] OR "exercise training"[tiab] OR "aerobic exercise"[tiab] OR "endurance
+  training"[tiab] OR "swimming training"[tiab] OR treadmill[tiab] OR "physical training"[tiab] OR
+  exerkine[tiab] OR exerkines[tiab]) AND (cardioprotection[tiab] OR cardioprotective[tiab] OR "cardiac
+  hypertrophy"[tiab] OR "physiological hypertrophy"[tiab] OR cardiomyocyte[tiab] OR cardiomyocytes[tiab]
+  OR "cardiac regeneration"[tiab] OR "systemic metabolism"[tiab] OR exerkine[tiab] OR exerkines[tiab]))
+  NOT ("cardiopulmonary exercise"[ti] OR "exercise testing"[ti] OR "exercise test"[ti] OR "exercise
+  capacity"[ti] OR "exercise tolerance"[ti] OR rehabilitation[ti])) OR (("physiological
+  hypertrophy"[tiab] OR "physiological cardiac hypertrophy"[tiab] OR "pathological hypertrophy"[tiab] OR
+  "pathological cardiac hypertrophy"[tiab] OR "athlete's heart"[tiab] OR "athlete heart"[tiab])) OR
+  (("cardiac fibrosis"[tiab] OR "myocardial fibrosis"[tiab] OR "cardiac fibroblast"[tiab] OR "cardiac
+  fibroblasts"[tiab] OR "cardiac remodeling"[tiab] OR "cardiac remodelling"[tiab]) AND ("heart
+  failure"[tiab])) OR (("cardiac regeneration"[tiab] OR "heart regeneration"[tiab] OR "cardiac
+  repair"[tiab] OR "myocardial repair"[tiab] OR "myocardial regeneration"[tiab] OR "cardiomyocyte
+  proliferation"[tiab]))) NOT (decoction[tiab] OR "network pharmacology"[tiab] OR "traditional Chinese
+  medicine"[tiab] OR "Mendelian randomization"[tiab] OR "Published Erratum"[pt] OR "Case Reports"[pt])
+
+# What the readers care about, in plain English: Kimi judges each paper's relevance against this
+# and tailors the summaries to it.
+interest: >-
+  Cardiovascular diseases and heart–brain interactions, with a particular interest in the effects of
+  exercise on systemic metabolism and cardiac regeneration. Research focuses on physiological and
+  pathological cardiac hypertrophy, myocardial fibrosis and remodeling in heart failure,
+  exercise-mediated cardioprotection, and the roles of immune cells in cardiac repair and regeneration.
+
+# Where to search besides PubMed. Europe PMC gets its own copy of the query restricted to title +
+# abstract (otherwise it would also match full text); it adds bioRxiv and other preprints.
+sources:
+  europepmc:
+    enabled: true
+    query: >-
+      (((TITLE_ABS:"heart-brain" OR TITLE_ABS:"brain-heart" OR TITLE_ABS:"heart-brain axis" OR
+      TITLE_ABS:"brain-heart axis" OR TITLE_ABS:cerebrocardiac OR TITLE_ABS:"stroke-heart" OR
+      TITLE_ABS:neurocardiac OR TITLE_ABS:neurocardiology)) OR (((TITLE_ABS:exercise OR
+      TITLE_ABS:"exercise training" OR TITLE_ABS:"aerobic exercise" OR TITLE_ABS:"endurance training" OR
+      TITLE_ABS:"swimming training" OR TITLE_ABS:treadmill OR TITLE_ABS:"physical training" OR
+      TITLE_ABS:exerkine OR TITLE_ABS:exerkines) AND (TITLE_ABS:cardioprotection OR
+      TITLE_ABS:cardioprotective OR TITLE_ABS:"cardiac hypertrophy" OR TITLE_ABS:"physiological
+      hypertrophy" OR TITLE_ABS:cardiomyocyte OR TITLE_ABS:cardiomyocytes OR TITLE_ABS:"cardiac
+      regeneration" OR TITLE_ABS:"systemic metabolism" OR TITLE_ABS:exerkine OR TITLE_ABS:exerkines))
+      NOT (TITLE:"cardiopulmonary exercise" OR TITLE:"exercise testing" OR TITLE:"exercise test" OR
+      TITLE:"exercise capacity" OR TITLE:"exercise tolerance" OR TITLE:rehabilitation)) OR
+      ((TITLE_ABS:"physiological hypertrophy" OR TITLE_ABS:"physiological cardiac hypertrophy" OR
+      TITLE_ABS:"pathological hypertrophy" OR TITLE_ABS:"pathological cardiac hypertrophy" OR
+      TITLE_ABS:"athlete's heart" OR TITLE_ABS:"athlete heart")) OR ((TITLE_ABS:"cardiac fibrosis" OR
+      TITLE_ABS:"myocardial fibrosis" OR TITLE_ABS:"cardiac fibroblast" OR TITLE_ABS:"cardiac
+      fibroblasts" OR TITLE_ABS:"cardiac remodeling" OR TITLE_ABS:"cardiac remodelling") AND
+      (TITLE_ABS:"heart failure")) OR ((TITLE_ABS:"cardiac regeneration" OR TITLE_ABS:"heart
+      regeneration" OR TITLE_ABS:"cardiac repair" OR TITLE_ABS:"myocardial repair" OR
+      TITLE_ABS:"myocardial regeneration" OR TITLE_ABS:"cardiomyocyte proliferation"))) NOT
+      (TITLE_ABS:decoction OR TITLE_ABS:"network pharmacology" OR TITLE_ABS:"traditional Chinese
+      medicine" OR TITLE_ABS:"Mendelian randomization" OR PUB_TYPE:"Published Erratum" OR PUB_TYPE:"Case
+      Reports")
+  openalex:         {enabled: false}   # matches full text: too noisy for this query
+  semantic_scholar: {enabled: false}   # often rate-limited without an API key
+  arxiv:            {enabled: false}   # little cardiovascular biology
+
+# ~270 PubMed papers a month, so rank from a bigger pool than the default 50.
+candidate_pool: 100
+
+# Optional: hard filter, only these journals (leave the list empty [] for all journals).
+journals: []
+
+ranking:
+  # Always score full marks for these. Authors: OpenAlex ID (python -m digest.openalex "Author Name")
+  # or exact name.
+  preferred_authors: []
+  preferred_journals: []
+
+  # + keyword_credit for each of these found in the paper's title, abstract or author keywords
+  # (case and -/space ignored; whole words must match).
+  key_words: ["Cardiovascular diseases and heart–brain interactions", "Physiological and pathological cardiac
+              hypertrophy", "Heart failure and cardiac fibrosis", "Exercise and systemic
+              metabolism", "Immune-mediated cardiac regeneration"]
+
+  # Hard filters (0 = off). Preferred authors/journals always pass.
+  # min_journal_citedness: 5   # min journal's 2-year mean citations (~ impact factor); preprints exempt
+
+# Where to post. to_env / webhook_env = the NAME of the secret holding the addresses / URL
+# (in .env when running locally, a repository secret on GitHub; a new name also needs a line
+# in the Run digest step of .github/workflows/digest.yml).
+outputs:
+  slack:
+    enabled: false
+    webhook_env: SLACK_WEBHOOK_URL
+    chinese_summary: false
+  wecom:
+    enabled: false
+    webhook_env: WeCom_URL
+    chinese_summary: false
+  email:
+    enabled: true
+    to_env: EMAIL_TO_JIAQI   # secret with the addresses, comma-separated
+    chinese_summary: false

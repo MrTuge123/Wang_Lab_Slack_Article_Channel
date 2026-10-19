@@ -2,7 +2,8 @@
 import requests
 
 from digest import paper
-from digest.notify.format import ZH_LABEL, date_range, digest_title, impact_line, stats_line
+from digest.notify.format import (CONNECTIONS_TITLE, ZH_LABEL, connection_lines, date_range, digest_title,
+                                  impact_line, stats_line)
 
 NAME = "Slack"
 
@@ -26,6 +27,8 @@ def build(top, sub, context=None):
                      f"_{esc(impact_line(p))}_\n"
                      f"{esc(p['summary'])}\n"
                      f"{zh}")
+    if context.get("connections"):
+        lines.append(f"*{CONNECTIONS_TITLE}*\n" + "\n".join(esc(x) for x in connection_lines(context["connections"])))
     return ["\n".join(lines)]
 
 
