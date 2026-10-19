@@ -18,11 +18,7 @@ import traceback
 
 import requests
 
-<<<<<<< HEAD
-from digest import llm, notify, openalex, paper, ranking, relevance, sources, summarizer
-=======
-from digest import connections, notify, openalex, paper, ranking, relevance, sources, summarizer
->>>>>>> 611ed29d947ba9baf4b987b2b5e9aacfd489004b
+from digest import connections, llm, notify, openalex, paper, ranking, relevance, sources, summarizer
 from digest.config import load_subscribers
 from digest.history import save_history, set_references
 from digest.store import load_seen, run_lock, save_seen
