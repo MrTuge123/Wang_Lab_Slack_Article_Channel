@@ -1,0 +1,201 @@
+
+========== Wang Lab (wang_lab) ==========
+Found: PubMed 41, Europe PMC 31, Semantic Scholar 50, arXiv 2
+87 new candidates. Looking up authors/journals in OpenAlex...
+Scoring relevance with Groq...
+  Batch 1 of 4 (25 papers)
+  Relevance scoring failed for 25 papers (Error code: 400 - {'error': {'message': "property 'thinking' is unsupported", 'type': 'invalid_request_error'}}); ranking them without it.
+  Batch 2 of 4 (25 papers)
+  Relevance scoring failed for 25 papers (Error code: 400 - {'error': {'message': "property 'thinking' is unsupported", 'type': 'invalid_request_error'}}); ranking them without it.
+  Batch 3 of 4 (25 papers)
+  Relevance scoring failed for 25 papers (Error code: 400 - {'error': {'message': "property 'thinking' is unsupported", 'type': 'invalid_request_error'}}); ranking them without it.
+  Batch 4 of 4 (12 papers)
+  Relevance scoring failed for 12 papers (Error code: 400 - {'error': {'message': "property 'thinking' is unsupported", 'type': 'invalid_request_error'}}); ranking them without it.
+  87 of 87 papers have no relevance score.
+
+score  rel     h  role                     jrnl  kw  pass  found in        title
+ 1.10    -    63  last                     12.3   1  yes   PM              RACR-MIL: Rank-aware contextual reasoning for weakly supervi
+ 1.02    -    34  corresponding            7.04   4  yes   PM              Artificial Intelligence in Photodynamic Therapy: From Molecu
+ 0.96    -     6  last                     7.49   6  yes   PM              Explainable/interpretable artificial intelligence and knowle
+ 0.89    -    42  corresponding             6.8   2  yes   S2              DMR-GNN: Differential multi-relational graph neural network 
+ 0.89    -    38  corresponding            5.18   3  yes   S2              Integrating multi-omics with machine learning: from genomic 
+ 0.87    -    47  last                    10.07   0  yes   EP              Motif-Based Hypergraph Representation Learning: Transductive
+ 0.86    -    43  first                     5.7   2  yes   S2              Graph Neural Network‐Based Reinforcement Learning for Decent
+ 0.82    -    61  corresponding               -   1  yes   EP              Deep-learning-driven tumor microenvironment profiling improv [preprint]
+ 0.81    -    45  last                     6.46   1  yes   S2              Multi-Modal Graph Neural Network-Inspired Vessel Identificat
+ 0.79    -    30  corresponding            4.77   3  yes   S2              CALT-GNN: a graph neural network with cross-attention and lo
+ 0.75    -    35  corresponding            7.49   1  yes   PM              Cross-tissue graph attention networks for semi-supervised ge
+ 0.75    -    38  last                     4.19   2  yes   S2              Dynamic Skill Demand Prediction for New Energy Manufacturing
+ 0.71    -    41  last                     7.49   0  yes   PM              DUET: a graph-based workflow for TCR-epitope prioritization 
+ 0.68    -    20  corresponding            9.49   1  yes   PM              Flexible Integration of Structurally Diverse Spatial Multi-O
+ 0.66    -    27  last                     4.86   2  yes   S2              FoM: Field-of-View-Aware Graph Neural Learning for Min–Max M
+ 0.65    -    15  first                   16.27   1  yes   S2              Drawer Graph Neural Network for Multi-Instance Learning.
+ 0.64    -    22  corresponding            7.87   1  yes   S2              Condition-Aware Dual-Stream Topological Graph Neural Network
+ 0.61    -    39  last                        -   1  yes   EP              Identification of differential topologically associating dom [preprint]
+ 0.60    -    20  corresponding            12.3   0  yes   PM              Hierarchical multi-atlas fusion network for robust and inter
+ 0.58    -    19  last                     4.79   2  yes   S2              An interpretable graph neural network inspired by graph sign
+ 0.55    -     7  corresponding            7.04   2  yes   PM              CDR-Informed Graph Neural Network for Plasma Metabolomics in
+ 0.55    -    23  first                    2.89   2  yes   S2              Multi-Agent Cooperative Navigation Algorithm Based on Trajec
+ 0.55    -     3  last                     0.38   5  yes   S2              QSAR Reimagined: Harnessing AI and Multi-omics for Next-gene
+ 0.54    -    22  last                        -   2  yes   S2              Multi-Term Fourier Graph Neural Network with Sample Relation [preprint]
+ 0.53    -    19  corresponding            3.61   2  yes   S2              Automatic grading of HER2 immunohistochemical whole-slide im
+ 0.53    -    10  corresponding            3.27   3  yes   S2              Graph Neural Network‐Guided and Interpretable Discovery of S
+ 0.52    -    14  first+corresponding      7.04   1  yes   PM              A Drug-Referenced Machine-Learning Framework for Prioritizin
+ 0.52    -    11  first                    5.27   2  yes   S2              Global trade network prediction based on spatiotemporal grap
+ 0.51    -    15  corresponding            9.02   0  yes   PM              Decoding spatial mTOR signalling reveals distinct roles in t
+ 0.50    -     3  first                    9.31   1  yes   PM,EP           ProMaya: A hierarchical universal deep learning framework fo
+ 0.50    -     9  first                    5.27   2  yes   S2              Constructing a graduate employability knowledge graph with m
+ 0.50    -    16  last                     6.01   1  yes   EP              GL-Fusion: A Multi-Omics Integration Method Based on Graph-L
+ 0.49    -    15  last                     6.01   1  yes   EP              A Lightweight Curriculum and Contrastive Learning Framework 
+ 0.49    -     3  corresponding            6.47   2  yes   PM              CMGL: Confidence-guided Multi-omics Graph Learning for Cance
+ 0.49    -    24  corresponding            3.65   1  yes   PM,EP           ELE: Estimating tissue-specific long noncoding RNA gene esse
+ 0.46    -    26  corresponding             2.6   1  yes   S2              FusionEP: Adaptive Cross-Modal Deep Fusion Network for Essen
+ 0.45    -     3  last                     2.99   3  yes   PM              AI-driven genotype-phenotype modeling: a framework integrati
+ 0.45    -    13  corresponding            2.95   2  yes   PM              Benchmarking biological knowledge-graph priors against singl
+ 0.45    -    26  corresponding            2.16   1  yes   S2              A comparative analysis of graph neural networks through simi
+ 0.45    -     7  corresponding            6.87   1  yes   PM              Graph attention network-driven single-cell omics analysis re
+ 0.44    -     8  corresponding            1.55   3  yes   S2              NNGeoGVS: A Unified Equivariant Graph Neural Network Framewo
+ 0.44    -    12  corresponding            2.95   2  yes   S2              Cervical cancer survival analysis by integrating multi-omics
+ 0.44    -     1  first+corresponding       8.2   1  yes   S2              Graph neural network-accelerated multi-objective design opti
+ 0.43    -     3  last                     7.49   1  yes   PM              Topology-guided dual-masked contrastive learning for weakly 
+ 0.42    -     7  first+corresponding      6.25   1  yes   S2              Intelligent security policy generation algorithm based on gr
+ 0.39    -     6  corresponding            5.85   1  yes   S2              GraphCastTEC: a spherical multi-resolution graph neural netw
+ 0.39    -    19  first                    2.52   1  yes   PM              Inferring gene regulatory networks from single-cell transcri
+ 0.39    -     8  corresponding            5.27   1  yes   S2              Graph neural network-based service migration decision in veh
+ 0.38    -     9  first                    4.82   1  yes   S2              Spatio-temporal prediction and macro-level correlates of han
+ 0.38    -     4  last                     6.01   1  yes   EP              CPGNet: Multimodal Graph Learning With Hierarchical Category
+ 0.36    -    12  first                    6.01   0  yes   PM,EP           GraphSC: Deep Graph Learning With Spectral Clustering for Fl
+ 0.34    -    12  corresponding            2.95   1  yes   S2              Multi-view graph neural network with channel attention and l
+ 0.34    -     9  first+corresponding      3.66   1  yes   PM              scDGCN: A Graph-Based Deep Clustering Framework for Single-C
+ 0.33    -    14  last                     2.36   1  yes   PM              A comparative analysis of graph neural networks and classica
+ 0.33    -     0  first+corresponding      0.82   3  yes   S2              An Efficient Graph Neural Network‐Based Routing Optimization
+ 0.33    -     8  corresponding            3.66   1  yes   S2              Accurate RNA-Ligand Binding Site Prediction Based on a Multi
+ 0.32    -     0  first                    3.09   2  yes   S2              Sensitive-aware graph neural network for privacy leakage tra
+ 0.32    -    12  last                     2.52   1  yes   S2              GLIMP: An Integrated Graph Neural Network-Large Language Mod
+ 0.32    -     0  first                       -   2  yes   EP              The Metabolic Organ Clock: A Computable Framework Linking Ce [preprint]
+ 0.32    -     0  first                       -   2  yes   S2              Shared-Roadmap Generation and Evaluator for Multi-Agent Path [preprint]
+ 0.32    -     0  first                       -   2  yes   S2              HGRP: Heterogeneous Graph Neural Network for Routability Pre [preprint]
+ 0.32    -     0  first+corresponding         -   2  yes   S2              An Accurate and Interpretable Hyper Graph Neural Network for [preprint]
+ 0.32    -     0  first                       -   2  yes   S2              Graph Neural Network-Driven Deep Reinforcement Learning for  [preprint]
+ 0.32    -     7  first+corresponding      3.65   1  yes   PM              Genome-phenome association prediction using weighted deep ma
+ 0.31    -     0  first+corresponding      5.27   1  yes   S2              Interpretable attention-deficit hyperactivity disorder diagn
+ 0.30    -    18  first                       -   0  yes   EP              Accurate reconstruction of spatial cell-type maps and charac [preprint]
+ 0.29    -     3  last                     6.51   0  yes   S2              Multi-stage attack detection in IIoT supply chains using gra
+ 0.29    -     5  corresponding            3.44   1  yes   PM,EP           Exploring the key genes of colorectal "adenoma-cancer" based
+ 0.28    -     4  first+corresponding      3.44   1  yes   PM,EP           Rigorous validation of graph-based network analysis reapprai
+ 0.27    -     1  first+corresponding      3.92   1  yes   S2              Intelligent Diagnosis Method for Rolling Bearings Based on M
+ 0.26    -     0  first+corresponding      4.04   1  yes   S2              Occluded object pose estimation based on adaptive graph neur
+ 0.26    -     7  corresponding            4.69   0  yes   PM,EP           A graph-attentive GAN for rare-cell-aware single-cell RNA-se
+ 0.25    -    15  first                    2.52   0  yes   PM,EP           MiRNA-Disease Association Prediction Using Game Optimization
+ 0.25    -     1  first                    6.01   0  yes   EP              Reinforcement Learning-Enhanced Dual-View GAT-Based Multi-Ta
+ 0.24    -     4  first+corresponding         0   2  yes   S2              Topology-Aware Lindblad Quantum Physics-Informed Spatio-Temp
+ 0.24    -     0  first+corresponding      3.44   1  yes   S2              Explainable spatiotemporal Graph Neural Networks: Multi-City
+ 0.23    -     0  first+corresponding      0.67   2  yes   S2              Simulation Study on Digital Divide Propagation Path of Elder
+ 0.22    -     0  first+corresponding         -   1  yes   EP              Leakage-aware retrospective validation of a GWAS-informed dr [preprint]
+ 0.22    -     0  first                       -   1  yes   EP              Path-AGNN-Cox: a reproducible statistical framework for test [preprint]
+ 0.22    -     0  first                       -   1  yes   S2              PreGS: A Parameter-Transfer-Based Multi-Expert Graph Neural  [preprint]
+ 0.19    -     0  first                    4.77   0  yes   PM,EP           CauSTI: causal spatial transcriptomic interaction inference 
+ 0.18    -     2  last                     1.58   1  yes   S2              Attention Guided Graph Neural Network andBayesian Reasoning 
+ 0.18    -     2  first+corresponding       4.0   0  yes   S2              Predicting LogP values using multi-strategy Graph Neural Net
+ 0.13    -     0  first                    0.83   1  yes   S2              An Edge-Deployable Lightweight Dynamic Spatio-Temporal Graph
+ 0.13    -    10  first+corresponding      0.82   0  yes   S2              A Novel Mathematical Framework for Multi-Scale Neural Dynami
+ 0.10    -     0  first                       0   1  yes   S2              Construction of urban drainage pipe network blockage recogni
+ 0.08    -     0  first                    1.94   0  yes   PM              MGCLSyn: multimodal graph contrastive learning for drug syne
+(rel: Kimi's 0-10 relevance to the subscriber's interest, - = not scored)
+(found in: PM PubMed, EP Europe PMC, OA OpenAlex, S2 Semantic Scholar, AX arXiv)
+
+Summarizing 5 papers and writing the overview...
+Connections: 25 shared references, 0 direct citations of earlier papers.
+----- DRY RUN: would post to Slack (1/1) -----
+:newspaper: *Wang Lab · paper digest*
+Sep 18 – Oct 18, 2026 · 5 new papers, picked from 87 candidates
+
+*Overview:* Recent submissions cluster around three main themes: graph neural network methods for cancer grading and subtype classification, integration of multi‑omics data for variant interpretation and pharmacogenomics, and broader AI applications linking molecular design to clinical outcomes. Approximately a dozen papers apply graph attention or relational networks to histopathology or spatial transcriptomics, while another ten focus on multi‑omics fusion using GNNs. A recurring trend is the emphasis on model interpretability and clinical translation, reflected in studies that combine knowledge graphs with deep learning or that embed mechanistic models within AI pipelines. The highlighted papers (#1, #2, #3, #5) were chosen for their strong alignment with these directions, high relevance to graph‑based bioinformatics, and clear articulation of methodological advances.
+
+*<https://pubmed.ncbi.nlm.nih.gov/42809995/|RACR-MIL: Rank-aware contextual reasoning for weakly supervised grading of squamous cell carcinoma using whole slide images.>*
+_Medical image analysis · top author: Ravishankar K. Iyer (last, h=63) · keywords: graph neural network · score 1.10_
+Addressed the challenge of grading squamous cell carcinoma on whole‑slide images by introducing RACR‑MIL, an attention‑based multiple‑instance learning framework that uses a hybrid graph to capture local and non‑local tissue relationships and applies rank‑ordering constraints to the attention scores. Reported 3‑9% improvement in grading accuracy and up to 10% better tumor localization compared with prior methods, with pathologists noting increased grading efficiency in 60% of cases.
+
+*<https://pubmed.ncbi.nlm.nih.gov/42884114/|Artificial Intelligence in Photodynamic Therapy: From Molecular Design of Photosensitizers to Intelligent Delivery, Adaptive Dosimetry, and Personalized Prognostication of Results.>*
+_International journal of molecular sciences · top author: David Aebisher (corresponding, h=34) · keywords: machine learning, deep learning, AI, artificial intelligence · score 1.02_
+Reviewed how artificial intelligence, including graph neural networks and generative models, can support the full photodynamic therapy workflow—from in silico photosensitizer design and nanoformulation optimization to adaptive light dosing, real‑time monitoring, and outcome prediction. Emphasized integration of mechanistic photochemistry models with AI to move toward reproducible, personalized photomedicine, highlighting data quality, validation, and interpretability concerns.
+
+*<https://pubmed.ncbi.nlm.nih.gov/42862883/|Explainable/interpretable artificial intelligence and knowledge graph neural network for synthetic lethality prediction: overview, challenges, and future directions.>*
+_Briefings in bioinformatics · top author: Noura Aherrahrou (last, h=6) · keywords: multi-omics, knowledge graph, graph neural network, GNN, AI, artificial intelligence · score 0.96_
+Surveyed graph neural network approaches for synthetic lethality prediction that combine heterogeneous knowledge graphs with multi‑omics data, evaluating architectures for multi‑layered biological integration, model interpretability, and emerging generative AI contributions. Identified challenges in transparent reasoning and clinical trust, and outlined future directions for zero‑shot reasoning using large language models.
+
+*<https://doi.org/10.1016/j.knosys.2026.117128|DMR-GNN: Differential multi-relational graph neural network for scalable multi-view learning>*
+_Knowledge-Based Systems · top author: Shiping Wang (corresponding, h=42) · keywords: graph neural network, GNN · score 0.89_
+No abstract available.
+
+*<https://doi.org/10.3389/fphar.2026.1980359|Integrating multi-omics with machine learning: from genomic variant functional annotation to pharmacogenomics and biomarker discovery>*
+_Frontiers in Pharmacology · top author: Lei Guo (corresponding, h=38) · keywords: multi-omics, machine learning, deep learning · score 0.89_
+Examined machine‑learning strategies for integrating multi‑omics datasets—genomics, transcriptomics, epigenomics, and proteomics—to annotate genomic variants and inform pharmacogenomics. Highlighted graph neural networks, transformers, and variational autoencoders across early, intermediate, and late fusion paradigms, discussing their role in variant reclassification, biomarker discovery, and personalized dosing, while noting data heterogeneity and regulatory hurdles.
+
+*Connections to your earlier papers*
+These 5 papers share 25 references with 17 earlier papers in your history. Most shared:
+• MOGONET integrates multi-omics data using graph convolutional networks allowing patient c… (2021): cited by 1 of these (Lv et al. 2026) and 5 earlier
+• Defining a Cancer Dependency Map (2017): cited by 1 of these (Felloussi et al. 2026) and 2 earlier
+• MOFA+: a statistical framework for comprehensive integration of multi-modal single-cell d… (2020): cited by 1 of these (Lv et al. 2026) and 2 earlier
+
+----- DRY RUN: would post to Email (1/1) [not sendable yet: it has no recipients (outputs.email.to or to_env)] -----
+Subject: 5 new papers for Wang Lab · Oct 18
+
+Wang Lab · paper digest
+Sep 18 – Oct 18, 2026 · 5 new papers, picked from 87 candidates
+
+Overview: Recent submissions cluster around three main themes: graph neural network methods for cancer grading and subtype classification, integration of multi‑omics data for variant interpretation and pharmacogenomics, and broader AI applications linking molecular design to clinical outcomes. Approximately a dozen papers apply graph attention or relational networks to histopathology or spatial transcriptomics, while another ten focus on multi‑omics fusion using GNNs. A recurring trend is the emphasis on model interpretability and clinical translation, reflected in studies that combine knowledge graphs with deep learning or that embed mechanistic models within AI pipelines. The highlighted papers (#1, #2, #3, #5) were chosen for their strong alignment with these directions, high relevance to graph‑based bioinformatics, and clear articulation of methodological advances.
+
+1. RACR-MIL: Rank-aware contextual reasoning for weakly supervised grading of squamous cell carcinoma using whole slide images.
+   Medical image analysis · top author: Ravishankar K. Iyer (last, h=63) · keywords: graph neural network · score 1.10
+   Anirudh Choudhary, Mosbah Aouad, Krishnakant Saboo … Ravishankar Iyer
+
+   Addressed the challenge of grading squamous cell carcinoma on whole‑slide images by introducing RACR‑MIL, an attention‑based multiple‑instance learning framework that uses a hybrid graph to capture local and non‑local tissue relationships and applies rank‑ordering constraints to the attention scores. Reported 3‑9% improvement in grading accuracy and up to 10% better tumor localization compared with prior methods, with pathologists noting increased grading efficiency in 60% of cases.
+
+   PubMed: https://pubmed.ncbi.nlm.nih.gov/42809995/
+   Publisher: https://doi.org/10.1016/j.media.2026.104262
+
+2. Artificial Intelligence in Photodynamic Therapy: From Molecular Design of Photosensitizers to Intelligent Delivery, Adaptive Dosimetry, and Personalized Prognostication of Results.
+   International journal of molecular sciences · top author: David Aebisher (corresponding, h=34) · keywords: machine learning, deep learning, AI, artificial intelligence · score 1.02
+   Rostyslav Marunych, Dorota Bartusik-Aebisher, Klaudia Dynarowicz … David Aebisher
+
+   Reviewed how artificial intelligence, including graph neural networks and generative models, can support the full photodynamic therapy workflow—from in silico photosensitizer design and nanoformulation optimization to adaptive light dosing, real‑time monitoring, and outcome prediction. Emphasized integration of mechanistic photochemistry models with AI to move toward reproducible, personalized photomedicine, highlighting data quality, validation, and interpretability concerns.
+
+   PubMed: https://pubmed.ncbi.nlm.nih.gov/42884114/
+   Publisher: https://doi.org/10.3390/ijms27198871
+
+3. Explainable/interpretable artificial intelligence and knowledge graph neural network for synthetic lethality prediction: overview, challenges, and future directions.
+   Briefings in bioinformatics · top author: Noura Aherrahrou (last, h=6) · keywords: multi-omics, knowledge graph, graph neural network, GNN, AI, artificial intelligence · score 0.96
+   Salsabil Felloussi, Fatima El Haoussi, Hamid Tairi, Noura Aherrahrou
+
+   Surveyed graph neural network approaches for synthetic lethality prediction that combine heterogeneous knowledge graphs with multi‑omics data, evaluating architectures for multi‑layered biological integration, model interpretability, and emerging generative AI contributions. Identified challenges in transparent reasoning and clinical trust, and outlined future directions for zero‑shot reasoning using large language models.
+
+   PubMed: https://pubmed.ncbi.nlm.nih.gov/42862883/
+   Publisher: https://doi.org/10.1093/bib/bbag564
+
+4. DMR-GNN: Differential multi-relational graph neural network for scalable multi-view learning
+   Knowledge-Based Systems · top author: Shiping Wang (corresponding, h=42) · keywords: graph neural network, GNN · score 0.89
+   Jie-Xin Yu, Zheng-Nan Chen, Jin-Hao Yan … Shi-Ping Wang
+
+   No abstract available.
+
+   Publisher: https://doi.org/10.1016/j.knosys.2026.117128
+
+5. Integrating multi-omics with machine learning: from genomic variant functional annotation to pharmacogenomics and biomarker discovery
+   Frontiers in Pharmacology · top author: Lei Guo (corresponding, h=38) · keywords: multi-omics, machine learning, deep learning · score 0.89
+   Jing Lv, Jin-Jin Guo, Yang-Yang Wang … Hong-Xing Zhang
+
+   Examined machine‑learning strategies for integrating multi‑omics datasets—genomics, transcriptomics, epigenomics, and proteomics—to annotate genomic variants and inform pharmacogenomics. Highlighted graph neural networks, transformers, and variational autoencoders across early, intermediate, and late fusion paradigms, discussing their role in variant reclassification, biomarker discovery, and personalized dosing, while noting data heterogeneity and regulatory hurdles.
+
+   Publisher: https://doi.org/10.3389/fphar.2026.1980359
+
+Connections to your earlier papers
+These 5 papers share 25 references with 17 earlier papers in your history. Most shared:
+• MOGONET integrates multi-omics data using graph convolutional networks allowing patient c… (2021): cited by 1 of these (Lv et al. 2026) and 5 earlier
+• Defining a Cancer Dependency Map (2017): cited by 1 of these (Felloussi et al. 2026) and 2 earlier
+• MOFA+: a statistical framework for comprehensive integration of multi-modal single-cell d… (2020): cited by 1 of these (Lv et al. 2026) and 2 earlier
+
+Searched: PubMed, Europe PMC, Semantic Scholar, arXiv
+
+
+Done: posted 5 of 87 candidates to Slack and Email.
