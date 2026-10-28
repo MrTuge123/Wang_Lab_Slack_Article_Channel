@@ -10,10 +10,11 @@ import os
 import time
 
 import yaml
-from openai import OpenAI, RateLimitError
+from openai import BadRequestError, OpenAI, RateLimitError
 
 PROVIDERS = {
-    "kimi": {"name": "Kimi", "key": "MOONSHOT_API_KEY", "base_url": "https://api.moonshot.ai/v1"},
+    "kimi": {"name": "Kimi", "key": "MOONSHOT_API_KEY", "base_url": "https://api.moonshot.ai/v1",
+             "thinking_toggle": True},     # accepts {"thinking": {"type": "disabled"}}
     "groq": {"name": "Groq", "key": "GROQ_API_KEY", "base_url": "https://api.groq.com/openai/v1",
              "tpm": 8000, "reasoning_effort": "low"},
 }
@@ -90,8 +91,8 @@ def _complete(system, user, model, max_tokens=None, thinking=True):
     thinking=False asks the model to answer without reasoning first: ~25x faster and far fewer
     tokens for simple judgments. A model that can't do that answers with reasoning instead."""
     extra = _options(model, system, user, max_tokens)
-    if not thinking and model not in _always_thinks:
-        extra["extra_body"] = {"thinking": {"type": "disabled"}}
+    if not thinking and provider().get("thinking_toggle") and model not in _always_thinks:
+        extra["extra_body"] = {"thinking": {"type": "disabled"}}   # only providers that accept it (Kimi)
     for attempt in range(5):
         try:
             r = _llm().chat.completions.create(
@@ -100,6 +101,13 @@ def _complete(system, user, model, max_tokens=None, thinking=True):
                 **extra,
             )
             return (r.choices[0].message.content or "").strip(), r.choices[0].finish_reason
+        except BadRequestError as e:
+            if "extra_body" in extra and "thinking" in str(e):     # this model can't turn reasoning off:
+                _always_thinks.add(model)                          # ask again with it on, and remember
+                extra.pop("extra_body")
+                print(f"  {model} can't answer without reasoning; using reasoning.")
+                continue
+            raise
         except RateLimitError as e:
             wait = _wait(e, attempt)
             print(f"  {name()} rate limit hit, waiting {wait}s...")
