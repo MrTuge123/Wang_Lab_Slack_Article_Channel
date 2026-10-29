@@ -69,16 +69,32 @@ def score_all(papers, sub):
     for b, batch in enumerate(batches, 1):
         if len(batches) > 1:
             print(f"  Batch {b} of {len(batches)} ({len(batch)} papers)")
-        try:
-            _score_batch(batch, readers, model, thinking, tag)
-        except (llm.RateLimited, OpenAIError, ValueError) as e:
-            print(f"  Relevance scoring failed for {len(batch)} papers ({e}); ranking them without it.")
+        _score_or_split(batch, readers, model, thinking, tag)
     for p in papers:
         if p["relevance"] is not None:
             p["relevance_for"] = tag
     missing = sum(p["relevance"] is None for p in papers)
     if missing:
         print(f"  {missing} of {len(papers)} papers have no relevance score.")
+
+
+def _too_large(e):
+    """The request alone is over the provider's per-minute token limit (Groq free tier: 413)."""
+    return getattr(e, "status_code", None) == 413 or "Request too large" in str(e)
+
+
+def _score_or_split(batch, readers, model, thinking, tag):
+    """Score a batch; if it's too big for one request, score each half instead (down to one paper)."""
+    try:
+        _score_batch(batch, readers, model, thinking, tag)
+    except (llm.RateLimited, OpenAIError, ValueError) as e:
+        if _too_large(e) and len(batch) > 1:
+            half = len(batch) // 2
+            print(f"  Too large for one {llm.name()} request; splitting into {half} + {len(batch) - half} papers.")
+            _score_or_split(batch[:half], readers, model, thinking, tag)
+            _score_or_split(batch[half:], readers, model, thinking, tag)
+        else:
+            print(f"  Relevance scoring failed for {len(batch)} papers ({e}); ranking them without it.")
 
 
 def _score_batch(batch, readers, model, thinking, tag):
